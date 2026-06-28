@@ -1,0 +1,34 @@
+x-common: &common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  working_dir: /app
+  gpus: all
+  shm_size: "8gb"
+  ipc: host
+  environment:
+    PYTHONHASHSEED: "42"
+    CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+    OMP_NUM_THREADS: "1"
+    MKL_NUM_THREADS: "1"
+    NVIDIA_VISIBLE_DEVICES: "all"
+    NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
+  volumes:
+    - ./data:/app/data
+    - ./results:/app/results
+    - ./logs:/app/logs
+    - ./configs:/app/configs:ro
+    - ./src:/app/src:ro
+  restart: "no"
+
+services:
+  train:
+    <<: *common
+    container_name: bfs_2d_pinn_train
+    command: python src/train_mlp.py --config configs/mlp_base.yaml
+
+  metrics:
+    <<: *common
+    container_name: bfs_2d_pinn_metrics
+    profiles: ["metrics"]
+    command: python src/run_metrics.py --config configs/mlp_base.yaml
