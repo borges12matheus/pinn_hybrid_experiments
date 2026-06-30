@@ -18,7 +18,9 @@ Documentação detalhada:
 - `src/metrics.py`: cálculo das métricas.
 - `src/plots.py`: geração dos gráficos.
 - `src/train_utils.py`: dataset, MLP e trainer.
-- `configs/mlp_base.yaml`: configuração padrão do experimento.
+- `configs/mlp_base.yaml`: configuração padrão do experimento MLP.
+- `configs/pinn_base.yaml`: configuração espelhada para o experimento PINN.
+- `configs/pinn_cont_v1.yaml` e `configs/pinn_cont_mom_v1.yaml`: variantes do PINN por formulação física.
 - `docker-compose.yml`: execução com GPU e volumes padronizados.
 
 ## Requisitos

@@ -22,13 +22,29 @@ x-common: &common
   restart: "no"
 
 services:
-  train:
+  train_mlp:
     <<: *common
-    container_name: bfs_2d_pinn_train
+    container_name: bfs_2d_mlp_train
     command: python src/train_mlp.py --config configs/mlp_base.yaml
 
-  metrics:
+  train_pinn_v1:
+    <<: *common
+    container_name: bfs_2d_pinn_train
+    command: python src/train_pinn.py --config configs/pinn_cont_v1.yaml
+
+  train_pinn_v2:
+    <<: *common
+    container_name: bfs_2d_pinn_v2_train
+    command: python src/train_pinn.py --config configs/pinn_cont_mom_v1.yaml
+
+  metrics_mlp:
+    <<: *common
+    container_name: bfs_2d_mlp_metrics
+    profiles: ["metrics"]
+    command: python src/run_metrics.py --config configs/mlp_base.yaml
+  
+  metrics_pinn:
     <<: *common
     container_name: bfs_2d_pinn_metrics
     profiles: ["metrics"]
-    command: python src/run_metrics.py --config configs/mlp_base.yaml
+    command: python src/run_metrics.py --config configs/pinn_cont_v1.yaml

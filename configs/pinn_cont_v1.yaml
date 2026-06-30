@@ -14,7 +14,7 @@ paths:
 
 dataset:
   parquet: dataset_bfs_2d_kepsilon_with_wz.parquet
-  test_output: dataset_test_mlp
+  test_output: dataset_test_pinn
 
 features:
   - x
@@ -32,7 +32,7 @@ targets:
   - dp
 
 model:
-  type: mlp
+  type: pinn
   width: 64
   depth: 4
   activation: tanh
@@ -56,3 +56,10 @@ split:
   bins: 8
   test_frac: 0.2
   version: v1
+
+pinn:
+  physics_mode: continuity
+  epochs_pre: 500
+  epochs_phys: 300
+  w_data: 1.0
+  w_cont: 1e-5
