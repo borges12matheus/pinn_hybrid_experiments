@@ -10,5 +10,8 @@ wheels/
 .venv
 
 # Paths
-logs/
+data/data_processed/
+results/models/
 results/plots/
+results/metrics/
+logs/
