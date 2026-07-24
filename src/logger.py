@@ -1,4 +1,3 @@
-import logging
 import json
 import time
 import platform
@@ -10,43 +9,20 @@ from datetime import datetime
 import psutil
 import torch
 
-def setup_logger(name, log_file):
-
-    Path(log_file).parent.mkdir(parents=True, exist_ok=True)
-
-    logger = logging.getLogger(name)
-
-    logger.setLevel(logging.INFO)
-
-    logger.handlers.clear()
-
-    formatter = logging.Formatter(
-        "%(asctime)s | %(levelname)s | %(message)s"
-    )
-
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setFormatter(formatter)
-
-    stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(formatter)
-
-    logger.addHandler(file_handler)
-    logger.addHandler(stream_handler)
-
-    return logger
-
-
 class ExperimentLogger:
-    def __init__(self, experiment_name, log_dir, config=None):
+    def __init__(self, experiment_name, experiment_type ,log_dir, config=None):
         self.experiment_name = experiment_name
+        self.experiment_type = experiment_type
         self.log_dir = Path(log_dir)
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.run_id = f"{experiment_name}_{timestamp}"
+        self.run_id = f"{experiment_name}_{experiment_type}_{timestamp}"
 
         self.log_path = self.log_dir / f"{self.run_id}.log"
         self.meta_path = self.log_dir / f"{self.run_id}.json"
+
+        self.logger = self._setup_logger()
 
         self.config = config or {}
         self.start_wall = None
@@ -54,6 +30,7 @@ class ExperimentLogger:
         self.metadata = {
             "run_id": self.run_id,
             "experiment_name": experiment_name,
+            "experiment_type": experiment_type,
             "start_time": None,
             "end_time": None,
             "wall_time_sec": None,
@@ -62,8 +39,6 @@ class ExperimentLogger:
             "hardware": self.get_hardware_info(),
             "training_history": []
         }
-
-        self.logger = self._setup_logger()
 
     def _setup_logger(self):
         logger = logging.getLogger(self.run_id)

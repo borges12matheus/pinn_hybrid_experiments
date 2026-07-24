@@ -33,6 +33,7 @@ def transform_nut(nut_log, mode="exp"):
         return nut_log
     raise ValueError(f"Unsupported nut transform: {mode}")
 
+
 # Definindo os Resíduos físicos (2D incompressível, estacionário)
 # ---------------------------------------------------------------------------------
 # v1) Continuidade
@@ -283,15 +284,201 @@ def train_pinn_epoch_cont_mom(
             total_mom / n_train
     )
 
-
+#########################################################
+#### Helpers para escolha do modelo físico da PINN
+#########################################################
 PINN_EPOCH_RUNNERS = {
     "continuity": train_pinn_epoch_continuity,
     "cont_mom": train_pinn_epoch_cont_mom,
 }
-
 
 def get_pinn_epoch_runner(physics_mode):
     if physics_mode not in PINN_EPOCH_RUNNERS:
         valid_modes = ", ".join(sorted(PINN_EPOCH_RUNNERS))
         raise ValueError(f"Unsupported PINN physics_mode '{physics_mode}'. Valid: {valid_modes}")
     return PINN_EPOCH_RUNNERS[physics_mode]
+
+###############################################
+### Avaliação do erro da PINN
+###############################################
+def compute_pinn_losses(
+    net,
+    dl_val,
+    feat_index,
+    x_mu,
+    x_sd,
+    y_mu,
+    y_sd,
+    physics_mode,
+    nut_transform,
+    device,
+):
+    """
+    Calcula as losses médias de dados e física no conjunto de validação,
+    sem atualizar os parâmetros da rede.
+    """
+
+    net.eval()
+
+    total_data = 0.0
+    total_cont = 0.0
+    total_mom = 0.0
+    n_samples = 0
+
+    # Não usar torch.no_grad(), pois os resíduos físicos precisam do autograd
+    with torch.enable_grad():
+
+        for X, Y in dl_val:
+            X = X.to(device, non_blocking=True)
+            Y = Y.to(device, non_blocking=True)
+
+            batch_size = X.size(0)
+
+            # -------------------------------------------------
+            # Loss supervisionada em escala normalizada
+            # -------------------------------------------------
+            pred_data = net(X)
+            loss_data = torch.mean((pred_data - Y) ** 2)
+
+            # -------------------------------------------------
+            # Recuperação das entradas na escala física
+            # -------------------------------------------------
+            X_phys = unnormalize_x(
+                X,
+                x_sd,
+                x_mu,
+            ).detach()
+
+            # Coordenadas físicas independentes para o autograd
+            x = (
+                X_phys[:, [feat_index["x"]]]
+                .clone()
+                .detach()
+                .requires_grad_(True)
+            )
+
+            y = (
+                X_phys[:, [feat_index["y"]]]
+                .clone()
+                .detach()
+                .requires_grad_(True)
+            )
+
+            # Recria a entrada física usando x e y diferenciáveis
+            X_phys_mod = X_phys.clone()
+
+            X_phys_mod[:, feat_index["x"]] = x.squeeze(-1)
+            X_phys_mod[:, feat_index["y"]] = y.squeeze(-1)
+
+            # Renormaliza as entradas para passar pela rede
+            Xn_mod = (X_phys_mod - x_mu) / x_sd
+
+            # Predição normalizada
+            pred_phys_n = net(Xn_mod)
+
+            # Predição em escala física
+            pred_phys = pred_phys_n * y_sd + y_mu
+
+            # -------------------------------------------------
+            # Campos coarse na escala física
+            # -------------------------------------------------
+            u_c = X_phys[:, [feat_index["Ux"]]]
+            v_c = X_phys[:, [feat_index["Uy"]]]
+
+            # -------------------------------------------------
+            # Resíduos físicos
+            # -------------------------------------------------
+            if physics_mode in {"cont", "continuity"}:
+
+                r_cont = pde_residuals_continuity(
+                    x=x,
+                    y=y,
+                    u_coarse=u_c,
+                    v_coarse=v_c,
+                    model_out=pred_phys,
+                )
+
+                loss_cont = torch.mean(r_cont**2)
+
+                loss_mom = torch.zeros(
+                    (),
+                    device=device,
+                    dtype=loss_data.dtype,
+                )
+
+            elif physics_mode == "cont_mom":
+
+                p_c = X_phys[:, [feat_index["p"]]]
+                nut_c = X_phys[:, [feat_index["nut_log"]]]
+                Re = X_phys[:, [feat_index["Re"]]]
+
+                r_cont, r_mom_u, r_mom_v = (
+                    pde_residuals_cont_mom(
+                        x=x,
+                        y=y,
+                        u_coarse=u_c,
+                        v_coarse=v_c,
+                        p_coarse=p_c,
+                        nut_coarse=nut_c,
+                        Re=Re,
+                        model_out=pred_phys,
+                        nut_transform=nut_transform,
+                    )
+                )
+
+                loss_cont = torch.mean(r_cont**2)
+
+                loss_mom_u = torch.nn.functional.smooth_l1_loss(
+                    r_mom_u,
+                    torch.zeros_like(r_mom_u),
+                    beta=1.0,
+                )
+
+                loss_mom_v = torch.nn.functional.smooth_l1_loss(
+                    r_mom_v,
+                    torch.zeros_like(r_mom_v),
+                    beta=1.0,
+                )
+
+                loss_mom = loss_mom_u + loss_mom_v
+
+            else:
+                raise ValueError(
+                    f"physics_mode inválido: {physics_mode}"
+                )
+
+            # -------------------------------------------------
+            # Acumulação ponderada pelo tamanho do batch
+            # -------------------------------------------------
+            total_data += loss_data.detach().item() * batch_size
+            total_cont += loss_cont.detach().item() * batch_size
+            total_mom += loss_mom.detach().item() * batch_size
+
+            n_samples += batch_size
+
+            # Remove referências aos grafos criados no batch
+            del (
+                X,
+                Y,
+                X_phys,
+                X_phys_mod,
+                Xn_mod,
+                pred_data,
+                pred_phys_n,
+                pred_phys,
+                x,
+                y,
+            )
+
+    if n_samples == 0:
+        raise ValueError("O DataLoader de validação está vazio.")
+
+    mean_data = total_data / n_samples
+    mean_cont = total_cont / n_samples
+
+    if physics_mode == "cont_mom":
+        mean_mom = total_mom / n_samples
+    else:
+        mean_mom = None
+
+    return mean_data, mean_cont, mean_mom

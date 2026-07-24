@@ -1,5 +1,6 @@
 experiment:
-  name: k_epsilon
+  name: cont_v1
+  type: k_epsilon
   seed: 42
 
 paths:
@@ -15,6 +16,7 @@ paths:
 dataset:
   parquet: dataset_bfs_2d_kepsilon_with_wz.parquet
   test_output: dataset_test_pinn
+  Re: 36000
 
 features:
   - x
@@ -24,6 +26,7 @@ features:
   - p
   - k
   - nut_log
+  - wz_log
   - Re
 
 targets:
@@ -59,7 +62,7 @@ split:
 
 pinn:
   physics_mode: continuity
-  epochs_pre: 500
-  epochs_phys: 300
+  epochs_pre: 1000
+  epochs_phys: 500
   w_data: 1.0
-  w_cont: 1e-5
+  w_cont: 1e-6

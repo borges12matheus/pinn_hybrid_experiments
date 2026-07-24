@@ -18,6 +18,13 @@ ROOT = Path(cfg["paths"]["root"])
 PATH_DATA = ROOT / cfg["paths"]["data_process_dir"]
 PATH_CFD = ROOT / cfg["paths"]["data_cfd_dir"]
 
+# Define número de Reynolds
+path_fine = cfg["cfd_data"]["path_fine"]
+path_coarse = cfg["cfd_data"]["path_coarse"]
+dataset = cfg["cfd_data"]["dataset"]
+RE = cfg["cfd_data"]["Re"]
+
+
 # Cria as pastas caso não existam
 for p in [PATH_DATA]:
     p.mkdir(parents=True, exist_ok=True)
@@ -78,7 +85,7 @@ def load_case(case_dir: str) -> pd.DataFrame:
     case = Path(case_dir)
     tdir = latest_dir(case)
 
-    fpath = tdir / "grid_pinn_epsilon_k_nut_p_U.xy"
+    fpath = tdir / dataset
     if not fpath.exists():
         raise FileNotFoundError(f"Arquivo não encontrado: {fpath}")
 
@@ -209,10 +216,10 @@ def add_velocity_gradients_from_grid(
 # -------------------------------------------------
 
 logger.info("Lendo caso coarse...")
-dfc = load_case(PATH_CFD / "cfd_rans_k_epsilon/coarse")
+dfc = load_case(PATH_CFD / path_coarse)
 
 logger.info("Lendo caso fine...")
-dff = load_case(PATH_CFD / "cfd_rans_k_epsilon/fine")
+dff = load_case(PATH_CFD / path_fine)
 
 # Merge ponto a ponto (x,y)
 df = dfc.merge(
@@ -230,6 +237,29 @@ df = dfc.merge(
     how="inner"
 )
 
+logger.info("Pontos coarse: %d", len(dfc))
+logger.info("Pontos fine: %d", len(dff))
+logger.info("Pontos após merge: %d", len(df))
+
+if df.empty:
+    raise ValueError(
+        "O merge coarse-fine não encontrou pontos coincidentes."
+    )
+
+coverage_coarse = len(df) / len(dfc)
+coverage_fine = len(df) / len(dff)
+
+logger.info("Cobertura coarse: %.2f%%", 100 * coverage_coarse)
+logger.info("Cobertura fine: %.2f%%", 100 * coverage_fine)
+
+if coverage_coarse < 0.99 or coverage_fine < 0.99:
+    logger.warning(
+        "Nem todos os pontos foram pareados. "
+        "Coarse: %.2f%% | Fine: %.2f%%",
+        100 * coverage_coarse,
+        100 * coverage_fine,
+    )
+
 # Erro coarse -> fine (targets do ML)
 df["dUx"] = df["Ux_f"] - df["Ux"]
 df["dUy"] = df["Uy_f"] - df["Uy"]
@@ -238,7 +268,9 @@ df["depsilon"] = df["epsilon_f"] - df["epsilon"]
 df["dk"] = df["k_f"] - df["k"]
 
 # Reynolds (fixo neste experimento)
-df["Re"] = 36000.0
+df["Re"] = RE
+# Normalizando valor de Re
+df["Re_norm"] = np.log10(df["Re"])
 
 # Calculando gradientes coarse
 df = add_velocity_gradients_from_grid(
@@ -311,6 +343,8 @@ df = (
 out = df[[
     "x",
     "y",
+
+    # Solução coarse
     "Ux",
     "Uy",
     "p",
@@ -320,7 +354,22 @@ out = df[[
     "wz_log",
     "sxy_log",
     "div_u_log",
-    "Re",
+
+    # Parâmetro físico
+    "Re_norm",
+
+    # Solução fine de referência
+    "Ux_f",
+    "Uy_f",
+    "p_f",
+    "epsilon_f",
+    "k_f",
+    "nut_f_log",
+    "wz_f_log",
+    "sxy_f_log",
+    "div_u_f_log",
+
+    # Targets coarse -> fine
     "dUx",
     "dUy",
     "dp",
@@ -330,7 +379,7 @@ out = df[[
     "dwz",
 ]].copy()
 
-out_name = "dataset_bfs_2d_kepsilon_with_sxy_wz.parquet"
+out_name = cfg["cfd_data"]["out_name"]
 out.to_parquet(PATH_DATA / out_name, index=False)
 
 logger.info(f"Dataset salvo em: {out_name}")

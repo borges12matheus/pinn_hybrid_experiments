@@ -1,6 +1,6 @@
 import argparse
 from pathlib import Path
-
+from datetime import datetime
 import joblib
 import matplotlib
 matplotlib.use("Agg")
@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import yaml
 
-from logger import setup_logger
+from logger import ExperimentLogger
 from metrics import evaluate_metrics
 from plots import (
     plot_error_compare,
@@ -45,49 +45,56 @@ def run_metrics_pipeline(
     metrics_path=None,
     predictions_path=None,
     plots_dir=None,
+    logs_dir=None,
     batch_size=4900,
     logger=None,
 ):
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    model_type = cfg["model"]["type"]
+    exp_name = cfg["experiment"]["name"]
+    width = cfg["model"]["width"]
+    depth = cfg["model"]["depth"]
+    seed = cfg["experiment"]["seed"]
+
+
     root = Path(cfg["paths"]["root"])
     path_data = root / cfg["paths"]["data_process_dir"]
     path_metric = root / cfg["paths"]["metrics_dir"]
     path_plot = root / cfg["paths"]["plots_dir"]
     path_log = root / cfg["paths"]["logs_dir"]
 
-    exp_name = cfg["experiment"]["name"]
-    width = cfg["model"]["width"]
-    depth = cfg["model"]["depth"]
-    seed = cfg["experiment"]["seed"]
-
     if model_path is None:
-        model_path = root / cfg["paths"]["models_dir"] / f"mlp_{exp_name}_d{depth}_w{width}.pt"
+        model_path = root / cfg["paths"]["models_dir"] / f"{model_type}_{exp_name}_d{depth}_w{width}.pt"
     if dataset_path is None:
-        dataset_path = path_data / f"dataset_test_mlp_{exp_name}_d{depth}_w{width}.parquet"
+        dataset_path = path_data / f"dataset_test_{model_type}_{exp_name}_d{depth}_w{width}.parquet"
     if xscaler_path is None:
-        xscaler_path = root / cfg["paths"]["models_dir"] / "mlp_scaler_X.pkl"
+        xscaler_path = root / cfg["paths"]["models_dir"] / f"{model_type}_scaler_X.pkl"
     if yscaler_path is None:
-        yscaler_path = root / cfg["paths"]["models_dir"] / "mlp_scaler_Y.pkl"
+        yscaler_path = root / cfg["paths"]["models_dir"] / f"{model_type}_scaler_Y.pkl"
     if metrics_path is None:
-        metrics_path = path_metric / f"{exp_name}_d{depth}_w{width}_seed{seed}.json"
+        metrics_path = path_metric / f"{model_type}" / f"{model_type}_{exp_name}_d{depth}_w{width}_seed{seed}.json"
     if predictions_path is None:
-        predictions_path = path_metric / f"{exp_name}_d{depth}_w{width}_seed{seed}_predictions.parquet"
+        predictions_path = path_metric / f"{model_type}_{exp_name}_d{depth}_w{width}_seed{seed}_predictions.parquet"
     if plots_dir is None:
-        plots_dir = path_plot / f"{exp_name}_d{depth}_w{width}_seed{seed}"
-
+        plots_dir = path_plot / f"{model_type}_{exp_name}_d{depth}_w{width}_seed{seed}"
+    if logs_dir is None:
+        logs_dir = path_log / f"{model_type}" / f"{model_type}_{cfg['experiment']['name']}_{timestamp}"
     plots_dir = Path(plots_dir)
     plots_dir.mkdir(parents=True, exist_ok=True)
     Path(metrics_path).parent.mkdir(parents=True, exist_ok=True)
     Path(predictions_path).parent.mkdir(parents=True, exist_ok=True)
 
     if logger is None:
-        logger = setup_logger(
-            "EVAL",
-            path_log / "metrics" / f"metrics_{exp_name}.log",
+        logger = ExperimentLogger(
+            experiment_name=f"{model_type}_{cfg['experiment']['name']}",
+            experiment_type=f"{cfg['experiment']['type']}",
+            log_dir= logs_dir,
+            config=cfg
         )
 
-    logger.info(f"Iniciando avaliacao final para {exp_name}")
-    logger.info(f"Modelo: {model_path}")
-    logger.info(f"Dataset: {dataset_path}")
+    logger.log_message(f"Iniciando avaliacao final para {exp_name}")
+    logger.log_message(f"Modelo: {model_path}")
+    logger.log_message(f"Dataset: {dataset_path}")
 
     xscaler = joblib.load(xscaler_path)
     yscaler = joblib.load(yscaler_path)
@@ -140,9 +147,9 @@ def run_metrics_pipeline(
             save_path=plots_dir / f"{label}_error_hist.png",
         )
 
-    logger.info(f"Avaliacao concluida. Metrics: {metrics_path}")
-    logger.info(f"Predictions: {predictions_path}")
-    logger.info(f"Plots: {plots_dir}")
+    logger.log_message(f"Avaliacao concluida. Metrics: {metrics_path}")
+    logger.log_message(f"Predictions: {predictions_path}")
+    logger.log_message(f"Plots: {plots_dir}")
 
     return {
         "metrics": metrics,

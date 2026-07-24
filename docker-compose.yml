@@ -22,29 +22,38 @@ x-common: &common
   restart: "no"
 
 services:
+  prepare_train_data:
+    <<: *common
+    container_name: bfs_2d_prepare_data
+    command: python src/prepare_data.py --config configs/dataset_etl/prepare_data.yaml
+  
   train_mlp:
     <<: *common
     container_name: bfs_2d_mlp_train
-    command: python src/train_mlp.py --config configs/mlp_base.yaml
+    command: python src/train_mlp.py --config configs/baseline/mlp_base.yaml
 
-  train_pinn_v1:
+  train_pinn:
     <<: *common
     container_name: bfs_2d_pinn_train
-    command: python src/train_pinn.py --config configs/pinn_cont_v1.yaml
+    command: python src/train_pinn.py --config configs/baseline/pinn_cont_base.yaml
 
-  train_pinn_v2:
+  train_pinn_cont_mom:
     <<: *common
-    container_name: bfs_2d_pinn_v2_train
+    container_name: bfs_2d_pinn_train_cont_mom_v1
     command: python src/train_pinn.py --config configs/pinn_cont_mom_v1.yaml
 
-  metrics_mlp:
+  benchmark_mlp:
     <<: *common
-    container_name: bfs_2d_mlp_metrics
-    profiles: ["metrics"]
-    command: python src/run_metrics.py --config configs/mlp_base.yaml
+    container_name: bfs_2d_mlp_benchmark
+    command: python src/run_external_benchmark.py 
+        --config configs/mlp_v3.yaml 
+        --model-path results/models/mlp_v3_d4_w64.pt 
+        --training-reynolds 32000
   
-  metrics_pinn:
+  benchmark_pinn:
     <<: *common
-    container_name: bfs_2d_pinn_metrics
-    profiles: ["metrics"]
-    command: python src/run_metrics.py --config configs/pinn_cont_v1.yaml
+    container_name: bfs_2d_pinn_benchmark
+    command: python src/run_external_benchmark.py 
+      --config configs/pinn_cont_v3.yaml 
+      --model-path results/models/pinn_cont_v3_d4_w64.pt 
+      --training-reynolds 32000

@@ -1,5 +1,6 @@
 experiment:
-  name: k_epsilon
+  name: cont_mom_v1
+  type: k_epsilon
   seed: 42
 
 paths:
@@ -15,6 +16,7 @@ paths:
 dataset:
   parquet: dataset_bfs_2d_kepsilon_with_wz.parquet
   test_output: dataset_test_pinn
+  Re: 36000
 
 features:
   - x

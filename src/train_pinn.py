@@ -5,14 +5,16 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import joblib
-from logger import setup_logger, ExperimentLogger
+from logger import ExperimentLogger
 from run_metrics import run_metrics_pipeline
+from run_metrics_physics import run_physics_metrics_pipeline
 from train_utils import DataProcess, MLP, BaseTrainer 
 from config_experiment import set_deterministic, hash_file, load_or_create_split
 from config_experiment import load_config
-from pinn_utils import get_pinn_epoch_runner
+from pinn_utils import get_pinn_epoch_runner, compute_pinn_losses
 
 # Carregando as configurações do experimento
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 cfg, CONFIG_PATH = load_config()
 split_cfg = cfg.get("split", {})
 pinn_cfg = cfg.get("pinn", {})
@@ -23,6 +25,7 @@ SPLIT_TEST_FRAC = float(split_cfg.get("test_frac", 0.2))
 SPLIT_VERSION = split_cfg.get("version", "v1")
 DATASET_TEST_OUTPUT = cfg["dataset"].get("test_output", "dataset_test_pinn")
 PHYSICS_MODE = pinn_cfg.get("physics_mode", "continuity")
+MIN_PHYS_EPOCHS = int(pinn_cfg.get("min_phys_epochs", 50))
 NUT_TRANSFORM = pinn_cfg.get("nut_transform", "exp")
 
 # Define os caminhos dos diretórios
@@ -31,31 +34,29 @@ PATH_DATA = ROOT / cfg["paths"]["data_process_dir"]
 PATH_CFD = ROOT / cfg["paths"]["data_cfd_dir"]
 PATH_MODEL = ROOT / cfg["paths"]["models_dir"]
 PATH_METRIC = ROOT / cfg["paths"]["metrics_dir"]
+PATH_METRIC_EXP = PATH_METRIC / "pinn" / f"pinn_{cfg['experiment']['name']}_{timestamp}"
 PATH_PLOT = ROOT / cfg["paths"]["plots_dir"]
 PATH_LOG = ROOT / cfg["paths"]["logs_dir"]
+PATH_LOG_EXP = PATH_LOG / "pinn" / f"pinn_{cfg['experiment']['name']}_{timestamp}"
 
-for p in [PATH_DATA, PATH_MODEL, PATH_METRIC, PATH_PLOT]:
+# Cria as pastas caso não existam
+for p in [PATH_DATA, PATH_MODEL, PATH_METRIC_EXP, PATH_PLOT, PATH_LOG_EXP]:
     p.mkdir(parents=True, exist_ok=True)
 
 # Helper de logs
-logger = setup_logger(
-    "PINN",
-    PATH_LOG / "pinn" / f"pinn_{cfg['experiment']['name']}.log"
-)
-
-exp_logger = ExperimentLogger(
-    experiment_name=f"{cfg['experiment']['name']}_pinn",
-    log_dir=PATH_LOG,
+logger = ExperimentLogger(
+    experiment_name=f"pinn_{cfg['experiment']['name']}",
+    experiment_type=f"{cfg['experiment']['type']}",
+    log_dir= PATH_LOG_EXP ,
     config=cfg
 )
 
 # Definindo dispositivo para experimento
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 DTYPE = torch.float32
-logger.info(f"Dispositivo do experimento: {DEVICE}")
+logger.log_message(f"Dispositivo do experimento: {DEVICE}")
 CONFIG_HASH = hash_file(CONFIG_PATH)
 NUM_WORKERS = int(cfg.get("training", {}).get("num_workers", 4))
-
 
 def run_pinn_stage2_epoch(physics_mode, stage2_runner, stage2_kwargs):
     stage2_result = stage2_runner(**stage2_kwargs)
@@ -138,9 +139,9 @@ def train_pinn_epoch(
     # Salvar dataset de teste
     out_test = f"{DATASET_TEST_OUTPUT}_{out_model}_d{depth}_w{width}.parquet"
     df_te.to_parquet(PATH_DATA / out_test, index=False)
-    logger.info(f"Dataset salvo: {out_test}")
-    exp_logger.log_message(f"Split salvo em: {split_path}")
-    exp_logger.metadata.update({
+    logger.log_message(f"Dataset salvo: {out_test}")
+    logger.log_message(f"Split salvo em: {split_path}")
+    logger.metadata.update({
         "config_path": str(CONFIG_PATH),
         "config_hash": CONFIG_HASH,
         "dataset_path": str(parquet_path),
@@ -171,7 +172,7 @@ def train_pinn_epoch(
     in_dim = len(feat_cols)
     out_dim = len(target_cols)
     net = MLP(in_dim=in_dim, out_dim=out_dim, width=width, depth=depth, act=nn.Tanh).to(DEVICE)
-    logger.info(f"Model device: {next(net.parameters()).device}")
+    logger.log_message(f"Model device: {next(net.parameters()).device}")
 
     opt = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=lr_wd)
 
@@ -185,6 +186,9 @@ def train_pinn_epoch(
 
     # Instancia a classe de treino
     trainer = BaseTrainer(net, opt, scheduler, model_path, DEVICE, patience_es)
+
+    # Iniciando vetor de histórico de Loss
+    history = []
 
     # Organizando indice de colunas e normalização
     feat_index = {c: i for i, c in enumerate(feat_cols)}
@@ -205,14 +209,18 @@ def train_pinn_epoch(
         trainer.scheduler.step(loss_val)
 
         trainer.update_best_model(loss_val)
-        
-        if trainer.stop_improve():
-            logger.info(f"Early stopping (val não melhorou). Melhor loss_val: {trainer.best_val:.6e}")
-            break
+
+        # Armazena histórico de loss
+        history.append({
+            "epoch": ep,
+            "loss_data": loss_pre,
+            "loss_val": loss_val,
+            "lr": opt.param_groups[0]["lr"],
+        })
 
         if ep % 10 == 0 or ep == 1:
             # salva os logs por epochs
-            exp_logger.log_epoch(
+            logger.log_epoch(
                 stage="PINN[PRE]",
                 epoch=ep,
                 loss_train=loss_pre,
@@ -220,14 +228,19 @@ def train_pinn_epoch(
                 lr=trainer.optimizer.param_groups[0]["lr"],
                 best_val=trainer.best_val
             )
-            logger.info(
-                f"[PINN][PRE] ep={ep:03d} "
-                f"loss_train={loss_pre:.6e} | "
-                f"loss_val={loss_val:.6e} | "
-                f"lr={opt.param_groups[0]['lr']:.2e}"
-            )
+        # Valida earling stop
+        if trainer.stop_improve():
+            logger.log_message(f"Early stopping (val não melhorou). Melhor loss_val: {trainer.best_val:.6e}")
+            break
     
+    # Restaura o melhor modelo encontrado no pré-treino
+    trainer.load_best()
+
     # Reinicia o scheduler e earling stopping
+    opt = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=lr_wd)
+
+    # treino + early stopping na VAL
+    # implementa o scheduler para ajustar o learning rate automaticamente
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         opt,
         factor=factor_lr,
@@ -236,8 +249,31 @@ def train_pinn_epoch(
 
     # Instancia a classe de treino
     trainer = BaseTrainer(net, opt, scheduler, model_path, DEVICE, patience_es)
-
+    
+    # Salva histórico de stage1 e reinicia vetor de loss
+    df_hist_stage_1 = pd.DataFrame(history)
+    df_hist_stage_1.to_csv(PATH_LOG_EXP / f'pinn_loss_history_stage1_{cfg["experiment"]["name"]}_{timestamp}.csv', index=False)
     history = []
+
+    ref_data, ref_cont, ref_mom = compute_pinn_losses(
+        net=net,
+        dl_val=dl_val,
+        feat_index=feat_index,
+        x_mu=x_mu,
+        x_sd=x_sd,
+        y_mu=y_mu,
+        y_sd=y_sd,
+        physics_mode=PHYSICS_MODE,
+        nut_transform=NUT_TRANSFORM,
+        device=DEVICE,
+    )
+    logger.log_message(
+        "[PINN][REFERÊNCIA] "
+        f"ref_data={ref_data:.6e} | "
+        f"ref_cont={ref_cont:.6e} | "
+        f"ref_mom={ref_mom if ref_mom is not None else 'N/A'}"
+    )
+
     # ---- STAGE 2: dados + física
     for ep in range(1, epochs_phys + 1):
         stage2_kwargs = {
@@ -263,14 +299,40 @@ def train_pinn_epoch(
             stage2_kwargs,
         )
 
-        loss_val = trainer.validate_supervised(dl_val)
-        trainer.scheduler.step(loss_val)
+        # Avaliando o erro
+        val_data, val_cont, val_mom = compute_pinn_losses(
+            net=net,
+            dl_val=dl_val,
+            feat_index=feat_index,
+            x_mu=x_mu,
+            x_sd=x_sd,
+            y_mu=y_mu,
+            y_sd=y_sd,
+            physics_mode=PHYSICS_MODE,
+            nut_transform=NUT_TRANSFORM,
+            device=DEVICE,
+        )
 
-        trainer.update_best_model(loss_val)
+        norm_data = val_data / (ref_data + 1e-12)
+        norm_cont = val_cont / (ref_cont + 1e-12)
 
-        if trainer.stop_improve():
-            logger.info(f"Early stopping (val não melhorou). Melhor loss_val: {trainer.best_val:.6e}")
-            break
+        if PHYSICS_MODE == "cont_mom":
+            norm_mom = val_mom / (ref_mom + 1e-12)
+
+            val_score = (
+                0.6 * norm_data
+                + 0.2 * norm_cont
+                + 0.2 * norm_mom
+            )
+        else:
+            norm_mom = None
+
+            val_score = (
+                0.7 * norm_data
+                + 0.3 * norm_cont
+            )
+        trainer.scheduler.step(val_score)
+        trainer.update_best_model(val_score)
         
         # Armazena histórico de loss
         history.append({
@@ -279,46 +341,54 @@ def train_pinn_epoch(
             "loss_data": loss_data,
             "loss_cont": loss_cont,
             "loss_mom": loss_mom,
+
+            "val_score": val_score,
+            "val_data": val_data,
+            "val_cont": val_cont,
+            "val_mom": val_mom,
+
+            "norm_data": norm_data,
+            "norm_cont": norm_cont,
+            "norm_mom": norm_mom,
+
+            "lr": opt.param_groups[0]["lr"],
         })
 
         if ep % 10 == 0 or ep == 1:
-            loss_mom_text = f"loss_mom={loss_mom:.3e} | " if loss_mom is not None else ""
-            exp_logger.log_epoch(
+            loss_mom_text = (f"loss_mom={loss_mom:.3e} | " if loss_mom is not None else "")
+            val_mom_text = (f"val_mom={val_mom:.3e} | " if val_mom is not None else "")
+
+            logger.log_epoch(
                 stage=f"PINN[{PHYSICS_MODE.upper()}]",
                 epoch=ep,
                 loss_total=loss_total,
                 loss_data=loss_data,
                 loss_cont=loss_cont,
                 **({"loss_mom": loss_mom} if loss_mom is not None else {}),
-                loss_val=loss_val,
+                val_score=val_score,
+                val_data=val_data,
+                val_cont=val_cont,
                 lr=trainer.optimizer.param_groups[0]["lr"],
                 best_val=trainer.best_val,
             )
-            logger.info(
-                f"[PINN][{PHYSICS_MODE.upper()}] ep={ep:03d} "
-                f"loss_total={loss_total:.6e} | "
-                f"loss_data={loss_data:.3e} | "
-                f"loss_cont={loss_cont:.3e} | "
-                f"{loss_mom_text}"
-                f"loss_val={loss_val:.3e} | "
-                f"lr={opt.param_groups[0]['lr']:.2e}"
+          
+        if ep >= MIN_PHYS_EPOCHS and trainer.stop_improve():
+            logger.log_message(
+                "Early stopping PINN. "
+                f"Melhor val_score: {trainer.best_val:.6e}"
             )
-    
-    df_hist = pd.DataFrame(history)
-    df_hist.to_csv(PATH_LOG / f'loss_history_pinn_{cfg["experiment"]["name"]}_{datetime.now().strftime}.csv', index=False)
+            break
+            
+    df_hist_stage2 = pd.DataFrame(history)
+    df_hist_stage2.to_csv(PATH_LOG_EXP / f'pinn_loss_history_stage2_{cfg["experiment"]["name"]}_{timestamp}.csv', index=False)
     return trainer, (train_ds.x_mu, train_ds.x_sd), (train_ds.y_mu, train_ds.y_sd)
 
 # ---------------------------------
 # Treinar a PINN e avaliar
 # ---------------------------------
-logger.info("="*80)
-logger.info("Iniciando experimento")
-logger.info(f'PINN_{cfg["experiment"]["name"]}')
-logger.info("="*80)
 
 # Iniciando a coleta dos logs
-exp_logger.start()
-
+logger.start()
 
 trainer, xscaler, yscaler = train_pinn_epoch(
     parquet_path=PATH_DATA / cfg["dataset"]["parquet"],
@@ -344,7 +414,11 @@ trainer, xscaler, yscaler = train_pinn_epoch(
 # salvar modelo e scalers
 joblib.dump(xscaler, PATH_MODEL / "pinn_scaler_X.pkl")
 joblib.dump(yscaler, PATH_MODEL / "pinn_scaler_Y.pkl")
-logger.info(f"Scalers da PINN salvos em:{PATH_MODEL}")
+logger.log_message(f"Scalers da PINN salvos em:{PATH_MODEL}")
+
+# ======================================================
+# AVALIAÇÃO DAS MÉTRICAS DE ACURÁCIA
+# ======================================================
 
 evaluation_result = run_metrics_pipeline(
     cfg=cfg,
@@ -352,22 +426,64 @@ evaluation_result = run_metrics_pipeline(
     dataset_path=PATH_DATA / f"{DATASET_TEST_OUTPUT}_{cfg['experiment']['name']}_d{cfg['model']['depth']}_w{cfg['model']['width']}.parquet",
     xscaler_path=PATH_MODEL / "pinn_scaler_X.pkl",
     yscaler_path=PATH_MODEL / "pinn_scaler_Y.pkl",
-    metrics_path=PATH_METRIC / f"pinn_{cfg['experiment']['name']}_d{cfg['model']['depth']}_w{cfg['model']['width']}_seed{cfg['experiment']['seed']}.json",
-    predictions_path=PATH_METRIC / f"pinn_{cfg['experiment']['name']}_d{cfg['model']['depth']}_w{cfg['model']['width']}_seed{cfg['experiment']['seed']}_predictions.parquet",
+    metrics_path=PATH_METRIC_EXP / f"pinn_{cfg['experiment']['name']}_d{cfg['model']['depth']}_w{cfg['model']['width']}_seed{cfg['experiment']['seed']}.json",
+    predictions_path=PATH_METRIC_EXP / f"pinn_{cfg['experiment']['name']}_d{cfg['model']['depth']}_w{cfg['model']['width']}_seed{cfg['experiment']['seed']}_predictions.parquet",
     plots_dir=PATH_PLOT / f"pinn_{cfg['experiment']['name']}_d{cfg['model']['depth']}_w{cfg['model']['width']}_seed{cfg['experiment']['seed']}",
+    logs_dir=PATH_LOG_EXP,
     batch_size=cfg["training"]["batch_size"],
     logger=logger,
 )
 
-# Fechando o log de métricas
-exp_logger.finish(final_metrics={
-    "best_val": trainer.best_val,
-    "model_path": str(trainer.model_path),
-    "evaluation": evaluation_result,
-})
+# ======================================================
+# AVALIAÇÃO DAS MÉTRICAS FÍSICAS NO DOMÍNIO COMPLETO
+# ======================================================
 
-logger.info("="*80)
-logger.info("Treino finalizado")
-logger.info(f"Melhor loss: {trainer.best_val:.6e}")
-logger.info(f"Modelo salvo: {trainer.model_path}")
-logger.info("="*80)
+logger.log_message("Iniciando avaliação física no domínio completo.")
+
+physics_result = run_physics_metrics_pipeline(
+    cfg=cfg,
+    model_path=trainer.model_path,
+    dataset_full_path=PATH_DATA / cfg["dataset"]["parquet"],
+    xscaler_path=PATH_MODEL / "pinn_scaler_X.pkl",
+    yscaler_path=PATH_MODEL / "pinn_scaler_Y.pkl",
+    metrics_path=(
+        PATH_METRIC_EXP
+        / (
+            f"pinn_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}"
+            f"_physics.json"
+        )
+    ),
+    predictions_path=(
+        PATH_METRIC_EXP
+        / (
+            f"pinn_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}"
+            f"_physics_predictions.parquet"
+        )
+    ),
+    batch_size=cfg["training"]["batch_size"],
+    n_neighbors=12,
+)
+
+logger.log_message(
+    "Avaliação física concluída. "
+    f"Metrics: {physics_result['metrics_path']}"
+)
+
+# ======================================================
+# FINALIZAÇÃO DO EXPERIMENTO
+# ======================================================
+
+logger.finish(
+    final_metrics={
+        "best_val": trainer.best_val,
+        "model_path": str(trainer.model_path),
+        "evaluation_data": evaluation_result,
+        "evaluation_physics": physics_result,
+    }
+)
