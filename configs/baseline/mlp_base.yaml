@@ -14,7 +14,7 @@ paths:
   logs_dir: logs
 
 dataset:
-  parquet: dataset_bfs_2d_kepsilon_Re36000_with_sxy_wz.parquet
+  parquet: dataset_bfs_2d_kepsilon_Re36000_full.parquet
   test_output: dataset_test_mlp
 
 features:

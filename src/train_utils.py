@@ -56,16 +56,29 @@ class DataProcess(Dataset):
         if self.has_y:
             self.Yn = torch.from_numpy((self.Y - self.y_mu) / self.y_sd).to(DTYPE)
 
+        self.physics_data = None
+
         if physics_col is not None:
             if physics_col not in df.columns:
                 raise ValueError(
                     f"Coluna física ausente: {physics_col}"
                 )
 
+            physics_values = (
+                df[[physics_col]]
+                .to_numpy(dtype=np.float32)
+            )
+
+            if not np.isfinite(physics_values).all():
+                raise ValueError(
+                    f"A coluna física '{physics_col}' contém NaN ou infinito."
+                )
+
             self.physics_data = torch.tensor(
-                df[[physics_col]].to_numpy(np.float32),
+                physics_values,
                 dtype=torch.float32,
             )
+
 
     def __len__(self):
         return self.Xn.shape[0]

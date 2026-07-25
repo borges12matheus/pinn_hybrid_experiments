@@ -133,9 +133,13 @@ def train_mlp_epoch(
         "split_test_frac": SPLIT_TEST_FRAC,
     })
 
-    test_ds = DataProcess(df_te, feat_cols, target_cols, 
-                         x_scaler=(train_ds.x_mu, train_ds.x_sd), 
-                         y_scaler=(train_ds.y_mu, train_ds.y_sd))
+    test_ds = DataProcess(
+                    df_te, 
+                    feat_cols, 
+                    target_cols, 
+                    x_scaler=(train_ds.x_mu, train_ds.x_sd), 
+                    y_scaler=(train_ds.y_mu, train_ds.y_sd)
+                )
     val_loader_kwargs = {
         "batch_size": batch_data,
         "shuffle": False,
@@ -213,7 +217,6 @@ def train_mlp_epoch(
 
 # Iniciando a coleta dos logs
 logger.start()
-
 
 trainer, xscaler, yscaler = train_mlp_epoch(
     parquet_path=PATH_DATA / cfg["dataset"]["parquet"],
