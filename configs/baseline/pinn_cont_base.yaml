@@ -14,7 +14,7 @@ paths:
   logs_dir: logs
 
 dataset:
-  parquet: dataset_bfs_2d_kepsilon_Re36000_with_sxy_wz.parquet
+  parquet: dataset_bfs_2d_kepsilon_Re36000_full.parquet
   test_output: dataset_test_pinn
 
 features:
@@ -62,5 +62,5 @@ pinn:
   epochs_pre: 1000
   epochs_phys: 1000
   w_data: 1.0
-  w_cont: 1e-6
+  w_cont: 5e-5
   w_mom: 1e-5

@@ -115,7 +115,7 @@ def train_pinn_epoch(
     df_te = df.iloc[te_idx].reset_index(drop=True)
 
     # Dataset supervisionado (dados treino)
-    train_ds = DataProcess(df_tr, feat_cols, target_cols)
+    train_ds = DataProcess(df_tr, feat_cols, target_cols, physics_col="div_u")
     train_generator = torch.Generator()
     train_generator.manual_seed(seed)
     loader_kwargs = {
@@ -155,7 +155,8 @@ def train_pinn_epoch(
 
     test_ds = DataProcess(df_te, feat_cols, target_cols, 
                          x_scaler=(train_ds.x_mu, train_ds.x_sd), 
-                         y_scaler=(train_ds.y_mu, train_ds.y_sd))
+                         y_scaler=(train_ds.y_mu, train_ds.y_sd),
+                         physics_col="div_u")
     val_loader_kwargs = {
         "batch_size": batch_data,
         "shuffle": False,

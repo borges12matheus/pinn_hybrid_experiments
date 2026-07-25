@@ -14,11 +14,14 @@ paths:
   logs_dir: logs
 
 cfd_data:
-  dataset: grid_pinn_epsilon_k_nut_p_U.xy
+  input_format: auto       # auto, raw ou csv
   path_coarse: cfd_rans_k_epsilon/Re_36000/coarse
   path_fine: cfd_rans_k_epsilon/Re_36000/fine
-  out_name: dataset_bfs_2d_kepsilon_Re36000_with_sxy_wz.parquet
+  dataset: grid_pinn_div(U)_epsilon_k_nut_p_U.xy
+  dataset_csv: grid_pinn_div(U)_epsilon_k_nut_p_U.csv
+  csv_separator: ","
   Re: 36000
+  out_name: dataset_bfs_2d_kepsilon_Re36000_full.parquet
 
 dataset:
   parquet: dataset_bfs_2d_kepsilon_Re20K_Re_36K_with_sxy_wz.parquet

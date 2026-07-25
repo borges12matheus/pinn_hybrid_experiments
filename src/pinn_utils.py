@@ -38,7 +38,7 @@ def transform_nut(nut_log, mode="exp"):
 # ---------------------------------------------------------------------------------
 # v1) Continuidade
 # ---------------------------------------------------------------------------------
-def pde_residuals_continuity(x, y, u_coarse, v_coarse, model_out):
+def pde_residuals_continuity(x, y, div_u_coarse, model_out):
     """
     x, y: (N,1) leaf tensors com requires_grad=True (os mesmos do forward)
     model_out:
@@ -48,16 +48,11 @@ def pde_residuals_continuity(x, y, u_coarse, v_coarse, model_out):
 
     dU, dV = model_out[:, [0]], model_out[:, [1]]
 
-    u_hat = u_coarse + dU
-    v_hat = v_coarse + dV
-
     # derivadas
-    u_x = grad(u_hat, x)
-    v_y = grad(v_hat, y)
+    dU_dx = grad(dU, x)
+    dV_dy = grad(dV, y)
 
-    r_cont = u_x + v_y
-
-    return r_cont
+    return div_u_coarse + dU_dx + dV_dy
 
 
 def train_pinn_epoch_continuity(
@@ -81,9 +76,15 @@ def train_pinn_epoch_continuity(
     total_cont = 0.0
     n_train = 0
 
-    for Xn, Yn in dl_data:
+    for Xn, Yn, div_u_coarse in dl_data:
         Xn = Xn.to(device)
         Yn = Yn.to(device)
+
+        div_u_coarse = div_u_coarse.to(
+            device=device,
+            dtype=Xn.dtype,
+        )
+
 
         # Loss supervisionada em escala normalizada
         pred_data = net(Xn)
@@ -102,21 +103,25 @@ def train_pinn_epoch_continuity(
         X_phys_mod[:, [feat_index["y"]]] = y
 
         # Renormaliza input
-        Xn_mod = (X_phys_mod - x_mu) / x_sd
+        x_sd_safe = torch.where(
+            torch.abs(x_sd) > 1e-12,
+            x_sd,
+            torch.ones_like(x_sd),
+        )
+
+        Xn_mod = (
+            X_phys_mod - x_mu
+        ) / x_sd_safe
+
 
         # Predição normalizada e desnormalizada
         pred_phys_n = net(Xn_mod)
         pred_phys = pred_phys_n * y_sd + y_mu
 
-        # Campos coarse físicos
-        u_c = X_phys[:, [feat_index["Ux"]]]
-        v_c = X_phys[:, [feat_index["Uy"]]]
-
         r_cont = pde_residuals_continuity(
             x=x,
             y=y,
-            u_coarse=u_c,
-            v_coarse=v_c,
+            div_u_coarse=div_u_coarse,
             model_out=pred_phys
         )
 
@@ -328,10 +333,15 @@ def compute_pinn_losses(
     # Não usar torch.no_grad(), pois os resíduos físicos precisam do autograd
     with torch.enable_grad():
 
-        for X, Y in dl_val:
+        for X, Y, div_u_coarse in dl_val:
             X = X.to(device, non_blocking=True)
             Y = Y.to(device, non_blocking=True)
 
+            div_u_coarse = div_u_coarse.to(
+                        device=device,
+                        dtype=X.dtype,
+                    )
+            
             batch_size = X.size(0)
 
             # -------------------------------------------------
@@ -393,8 +403,7 @@ def compute_pinn_losses(
                 r_cont = pde_residuals_continuity(
                     x=x,
                     y=y,
-                    u_coarse=u_c,
-                    v_coarse=v_c,
+                    div_u_coarse=div_u_coarse,
                     model_out=pred_phys,
                 )
 
