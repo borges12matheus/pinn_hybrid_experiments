@@ -32,10 +32,10 @@ NUT_TRANSFORM = pinn_cfg.get("nut_transform", "exp")
 ROOT = Path(cfg["paths"]["root"])
 PATH_DATA = ROOT / cfg["paths"]["data_process_dir"]
 PATH_CFD = ROOT / cfg["paths"]["data_cfd_dir"]
-PATH_MODEL = ROOT / cfg["paths"]["models_dir"]
+PATH_MODEL = ROOT / cfg["paths"]["models_dir"] / "pinn" / f"pinn_{cfg['experiment']['name']}_{timestamp}"
 PATH_METRIC = ROOT / cfg["paths"]["metrics_dir"]
 PATH_METRIC_EXP = PATH_METRIC / "pinn" / f"pinn_{cfg['experiment']['name']}_{timestamp}"
-PATH_PLOT = ROOT / cfg["paths"]["plots_dir"]
+PATH_PLOT = ROOT / cfg["paths"]["plots_dir"] / "pinn" / f"pinn_{cfg['experiment']['name']}_{timestamp}"
 PATH_LOG = ROOT / cfg["paths"]["logs_dir"]
 PATH_LOG_EXP = PATH_LOG / "pinn" / f"pinn_{cfg['experiment']['name']}_{timestamp}"
 
@@ -424,12 +424,44 @@ logger.log_message(f"Scalers da PINN salvos em:{PATH_MODEL}")
 evaluation_result = run_metrics_pipeline(
     cfg=cfg,
     model_path=trainer.model_path,
-    dataset_path=PATH_DATA / f"{DATASET_TEST_OUTPUT}_{cfg['experiment']['name']}_d{cfg['model']['depth']}_w{cfg['model']['width']}.parquet",
+    dataset_path=(
+        PATH_DATA 
+        / (
+            f"{DATASET_TEST_OUTPUT}"
+            f"_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}.parquet"
+        )
+    ),
     xscaler_path=PATH_MODEL / "pinn_scaler_X.pkl",
     yscaler_path=PATH_MODEL / "pinn_scaler_Y.pkl",
-    metrics_path=PATH_METRIC_EXP / f"pinn_{cfg['experiment']['name']}_d{cfg['model']['depth']}_w{cfg['model']['width']}_seed{cfg['experiment']['seed']}.json",
-    predictions_path=PATH_METRIC_EXP / f"pinn_{cfg['experiment']['name']}_d{cfg['model']['depth']}_w{cfg['model']['width']}_seed{cfg['experiment']['seed']}_predictions.parquet",
-    plots_dir=PATH_PLOT / f"pinn_{cfg['experiment']['name']}_d{cfg['model']['depth']}_w{cfg['model']['width']}_seed{cfg['experiment']['seed']}",
+    metrics_path=(
+        PATH_METRIC_EXP 
+        / (f"pinn_{cfg['experiment']['name']}"
+           f"_d{cfg['model']['depth']}"
+           f"_w{cfg['model']['width']}"
+           f"_seed{cfg['experiment']['seed']}.json"
+        )
+    ),
+    predictions_path=(
+        PATH_METRIC_EXP 
+        / (
+            f"pinn_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}"
+            f"_predictions.parquet"
+        )
+    ),
+    plots_dir=(
+        PATH_PLOT 
+        / (
+            f"pinn_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}"
+        )
+    ),
     logs_dir=PATH_LOG_EXP,
     batch_size=cfg["training"]["batch_size"],
     logger=logger,
@@ -468,7 +500,15 @@ physics_result = run_physics_metrics_pipeline(
         )
     ),
     batch_size=cfg["training"]["batch_size"],
-    n_neighbors=12,
+    plots_dir= (
+        PATH_PLOT 
+        / (
+            f"pinn_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}"
+        )
+    )
 )
 
 logger.log_message(

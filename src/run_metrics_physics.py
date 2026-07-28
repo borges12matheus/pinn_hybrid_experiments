@@ -7,6 +7,10 @@ import pandas as pd
 import torch
 
 from metrics_physics import evaluate_exported_divergence_metrics
+from plots import (
+    plot_divergence_compare,
+    plot_divergence_error,
+)
 from run_metrics import build_model
 
 def predict_full_domain_with_divergence(
@@ -231,16 +235,16 @@ def predict_full_domain_with_divergence(
     return result_df
 
 def run_physics_metrics_pipeline(
-    cfg,
-    model_path,
-    dataset_full_path,
-    xscaler_path,
-    yscaler_path,
-    metrics_path,
-    predictions_path,
-    batch_size=4096,
-    n_neighbors=12,
-):
+        cfg,
+        model_path,
+        dataset_full_path,
+        xscaler_path,
+        yscaler_path,
+        metrics_path,
+        predictions_path,
+        batch_size=4096,
+        plots_dir=None
+    ):
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     model = build_model(cfg, model_path).to(device)
@@ -289,7 +293,7 @@ def run_physics_metrics_pipeline(
     metrics_path = Path(metrics_path)
     metrics_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(metrics_path, "w", encoding="utf-8") as file:
+    with metrics_path.open("w", encoding="utf-8") as file:
         json.dump(
             physics_metrics,
             file,
@@ -298,15 +302,71 @@ def run_physics_metrics_pipeline(
         )
 
     predictions_path = Path(predictions_path)
-    predictions_path.parent.mkdir(parents=True, exist_ok=True)
+    predictions_path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
     physics_df.to_parquet(
         predictions_path,
         index=False,
     )
 
+    generated_plots = {}
+
+    if plots_dir is not None:
+        plots_dir = Path(plots_dir)
+        plots_dir.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        plot_specs = {
+            "divergence_absolute": {
+                "path": plots_dir / "divergence_absolute.png",
+                "absolute": True,
+            },
+            "divergence_signed": {
+                "path": plots_dir / "divergence_signed.png",
+                "absolute": False,
+            },
+        }
+
+        for plot_name, spec in plot_specs.items():
+            plot_divergence_compare(
+                df_plot=physics_df,
+                field_coarse="div_u",
+                field_fine="div_u_f",
+                field_corrected="div_corrected",
+                model_name=f'{cfg["model"]["type"]}_{cfg["experiment"]["name"]}',
+                absolute=spec["absolute"],
+                save_path=spec["path"],
+            )
+
+            generated_plots[plot_name] = str(
+                spec["path"]
+            )
+
+        error_path = (
+            plots_dir
+            / "divergence_error_vs_fine.png"
+        )
+
+        plot_divergence_error(
+            df_plot=physics_df,
+            corrected_field="div_corrected",
+            fine_field="div_u_f",
+            model_name=f'{cfg["model"]["type"]}_{cfg["experiment"]["name"]}',
+            save_path=error_path,
+        )
+
+        generated_plots[
+            "divergence_error_vs_fine"
+        ] = str(error_path)
+
     return {
         "metrics": physics_metrics,
         "metrics_path": str(metrics_path),
         "predictions_path": str(predictions_path),
+        "plots": generated_plots,
     }

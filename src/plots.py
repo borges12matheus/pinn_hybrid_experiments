@@ -13,7 +13,7 @@ def _finalize_figure(fig, save_path=None, show=False, close=True):
 
 
 # ----------------------------
-# Plots
+# Plots Acurácia
 # ----------------------------
 def plot_field_compare(
     df_plot,
@@ -300,3 +300,237 @@ def plot_scatter_prediction(
     ax.set_aspect("equal")
 
     _finalize_figure(fig, save_path=save_path, show=show, close=close)
+
+##########################################
+##### Métricas Físicas
+##########################################
+def plot_divergence_compare(
+    df_plot,
+    field_coarse="div_u",
+    field_fine="div_u_f",
+    field_corrected="div_corrected",
+    model_name="Modelo",
+    h=0.0127,
+    percentile=99.0,
+    absolute=True,
+    save_path=None,
+    show=False,
+    close=True,
+):
+    """
+    Compara os campos de divergência do CFD coarse, CFD fine
+    e campo corrigido usando a mesma escala de cores.
+
+    Parameters
+    ----------
+    absolute:
+        True  -> plota |div(U)|.
+        False -> plota div(U) com escala simétrica em torno de zero.
+    percentile:
+        Percentil usado para limitar a escala e reduzir o efeito de outliers.
+    """
+    required = {
+        "x",
+        "y",
+        field_coarse,
+        field_fine,
+        field_corrected,
+    }
+
+    missing = required - set(df_plot.columns)
+
+    if missing:
+        raise ValueError(
+            f"Colunas ausentes para o mapa de divergência: {sorted(missing)}"
+        )
+
+    x = df_plot["x"].to_numpy(dtype=np.float64) / h
+    y = df_plot["y"].to_numpy(dtype=np.float64) / h
+
+    fields = [
+        field_coarse,
+        field_fine,
+        field_corrected,
+    ]
+
+    titles = [
+        "CFD coarse",
+        "CFD fine",
+        "Corrigido",
+    ]
+
+    values = [
+        df_plot[field].to_numpy(dtype=np.float64)
+        for field in fields
+    ]
+
+    all_values = np.concatenate(values)
+    finite_values = all_values[np.isfinite(all_values)]
+
+    if finite_values.size == 0:
+        raise ValueError(
+            "Nenhum valor finito encontrado nos campos de divergência."
+        )
+
+    if absolute:
+        values = [np.abs(value) for value in values]
+
+        vmax = np.nanpercentile(
+            np.concatenate(values),
+            percentile,
+        )
+
+        vmin = 0.0
+        cmap = "inferno"
+        colorbar_label = r"$|\nabla\cdot\mathbf{U}|$ [s$^{-1}$]"
+
+    else:
+        vmax = np.nanpercentile(
+            np.abs(finite_values),
+            percentile,
+        )
+
+        vmin = -vmax
+        cmap = "coolwarm"
+        colorbar_label = r"$\nabla\cdot\mathbf{U}$ [s$^{-1}$]"
+
+    if not np.isfinite(vmax) or vmax <= 0:
+        vmax = 1.0
+
+    fig, axes = plt.subplots(
+        1,
+        3,
+        figsize=(22, 4),
+        constrained_layout=True,
+    )
+
+    scatter = None
+
+    for ax, field_values, title in zip(
+        axes,
+        values,
+        titles,
+    ):
+        scatter = ax.scatter(
+            x,
+            y,
+            c=field_values,
+            s=4,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            rasterized=True,
+        )
+
+        ax.set_title(title)
+        ax.set_xlabel(r"$x/H$")
+        ax.set_ylabel(r"$y/H$")
+        ax.set_xlim([-130, 50])
+        ax.set_ylim([0, 9])
+        ax.set_aspect("auto")
+
+    fig.colorbar(
+        scatter,
+        ax=axes,
+        label=colorbar_label,
+    )
+
+    mode = "Módulo" if absolute else "Campo assinado"
+
+    fig.suptitle(
+        f"{mode} da divergência — {model_name}",
+        fontsize=14,
+    )
+
+    _finalize_figure(
+        fig,
+        save_path=save_path,
+        show=show,
+        close=close,
+    )
+
+def plot_divergence_error(
+    df_plot,
+    corrected_field="div_corrected",
+    fine_field="div_u_f",
+    model_name="Modelo",
+    h=0.0127,
+    percentile=99.0,
+    save_path=None,
+    show=False,
+    close=True,
+):
+    required = {
+        "x",
+        "y",
+        corrected_field,
+        fine_field,
+    }
+
+    missing = required - set(df_plot.columns)
+
+    if missing:
+        raise ValueError(
+            f"Colunas ausentes para erro de divergência: {sorted(missing)}"
+        )
+
+    x = df_plot["x"].to_numpy(dtype=np.float64) / h
+    y = df_plot["y"].to_numpy(dtype=np.float64) / h
+
+    error = (
+        df_plot[corrected_field].to_numpy(dtype=np.float64)
+        - df_plot[fine_field].to_numpy(dtype=np.float64)
+    )
+
+    finite_error = error[np.isfinite(error)]
+
+    if finite_error.size == 0:
+        raise ValueError(
+            "Nenhum valor finito encontrado no erro de divergência."
+        )
+
+    vmax = np.nanpercentile(
+        np.abs(finite_error),
+        percentile,
+    )
+
+    if not np.isfinite(vmax) or vmax <= 0:
+        vmax = 1.0
+
+    fig, ax = plt.subplots(
+        figsize=(18, 5),
+        constrained_layout=True,
+    )
+
+    scatter = ax.scatter(
+        x,
+        y,
+        c=error,
+        s=4,
+        cmap="coolwarm",
+        vmin=-vmax,
+        vmax=vmax,
+        rasterized=True,
+    )
+
+    ax.set_title(
+        f"Erro de divergência — {model_name} menos CFD fine"
+    )
+    ax.set_xlabel(r"$x/H$")
+    ax.set_ylabel(r"$y/H$")
+    ax.set_xlim([-130, 50])
+    ax.set_ylim([0, 9])
+    ax.set_aspect("auto")
+
+    fig.colorbar(
+        scatter,
+        ax=ax,
+        label=r"$\nabla\cdot U_{corr}-\nabla\cdot U_{fine}$ [s$^{-1}$]",
+    )
+
+    _finalize_figure(
+        fig,
+        save_path=save_path,
+        show=show,
+        close=close,
+    )

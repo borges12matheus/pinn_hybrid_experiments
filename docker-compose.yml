@@ -57,3 +57,16 @@ services:
       --config configs/pinn_cont_v3.yaml 
       --model-path results/models/pinn_cont_v3_d4_w64.pt 
       --training-reynolds 32000
+
+  clean_experiments:
+    <<: *common
+    container_name: bfs_2d_cleanup
+    command: python src/cleanup_experiments.py
+    ## --apply --yes
+
+  compare_experiments:
+    <<: *common
+    container_name: bfs_2d_compare_exp
+    command: python src/compare_experiment_logs.py 
+      --logs-root logs 
+      --output-dir results/comparisons
