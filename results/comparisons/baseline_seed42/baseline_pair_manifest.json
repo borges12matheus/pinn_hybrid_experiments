@@ -1,0 +1,8 @@
+{
+  "mlp_config": "/app/configs/baseline/mlp_base.yaml",
+  "pinn_config": "/app/configs/baseline/pinn_cont_base.yaml",
+  "mlp_predictions": "/app/results/metrics/mlp/mlp_base_20260729_192246/mlp_base_d4_w64_seed42_physics_predictions.parquet",
+  "pinn_predictions": "/app/results/metrics/pinn/pinn_cont_base_20260729_192724/pinn_cont_base_d4_w64_seed42_physics_predictions.parquet",
+  "fairness_report": "/app/results/comparisons/baseline_seed42/fairness_report.json",
+  "comparison_output_dir": "/app/results/comparisons/baseline_seed42/plots"
+}

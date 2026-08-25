@@ -1,16 +1,19 @@
 from pathlib import Path
+from datetime import datetime
 import pandas as pd
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import joblib
-from logger import setup_logger, ExperimentLogger
+from logger import ExperimentLogger
 from run_metrics import run_metrics_pipeline
+from run_metrics_physics import run_physics_metrics_pipeline
 from train_utils import DataProcess, MLP, BaseTrainer 
 from config_experiment import set_deterministic, hash_file, load_or_create_split
 from config_experiment import load_config
 
 # Carregando as configurações do experimento
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 cfg, CONFIG_PATH = load_config()
 split_cfg = cfg.get("split", {})
 SPLIT_STRATEGY = split_cfg.get("strategy", "spatial_x_quantile")
@@ -24,29 +27,28 @@ DATASET_TEST_OUTPUT = cfg["dataset"].get("test_output", "dataset_test_mlp")
 ROOT = Path(cfg["paths"]["root"])
 PATH_DATA = ROOT / cfg["paths"]["data_process_dir"]
 PATH_CFD = ROOT / cfg["paths"]["data_cfd_dir"]
-PATH_MODEL = ROOT / cfg["paths"]["models_dir"]
+PATH_MODEL = ROOT / cfg["paths"]["models_dir"] / "mlp" / f"mlp_{cfg['experiment']['name']}_{timestamp}"
 PATH_METRIC = ROOT / cfg["paths"]["metrics_dir"]
-PATH_PLOT = ROOT / cfg["paths"]["plots_dir"]
+PATH_METRIC_EXP = PATH_METRIC / "mlp" / f"mlp_{cfg['experiment']['name']}_{timestamp}"
+PATH_PLOT = ROOT / cfg["paths"]["plots_dir"] / "mlp"
 PATH_LOG = ROOT / cfg["paths"]["logs_dir"]
+PATH_LOG_EXP = PATH_LOG / "mlp" / f"mlp_{cfg['experiment']['name']}_{timestamp}"
 
-for p in [PATH_DATA, PATH_MODEL, PATH_METRIC, PATH_PLOT]:
+# Cria as pastas caso não existam
+for p in [PATH_DATA, PATH_MODEL, PATH_METRIC_EXP, PATH_PLOT, PATH_LOG_EXP]:
     p.mkdir(parents=True, exist_ok=True)
 
 # Helper de logs
-logger = setup_logger(
-    "MLP",
-    PATH_LOG / "mlp" / f"mlp_{cfg['experiment']['name']}.log"
-)
-
-exp_logger = ExperimentLogger(
-    experiment_name=cfg["experiment"]["name"],
-    log_dir=PATH_LOG,
+logger = ExperimentLogger(
+    experiment_name=f'mlp_{cfg["experiment"]["name"]}',
+    experiment_type=f'{cfg["experiment"]["type"]}',
+    log_dir= PATH_LOG_EXP,
     config=cfg
 )
 
 # Definindo dispositivo para experimento
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-logger.info(f"Dispositivo do experimento: {DEVICE}")
+logger.log_message(f"Dispositivo do experimento: {DEVICE}")
 CONFIG_HASH = hash_file(CONFIG_PATH)
 NUM_WORKERS = int(cfg.get("training", {}).get("num_workers", 4))
 
@@ -117,9 +119,9 @@ def train_mlp_epoch(
     # Salvar dataset de teste
     out_test = f"{DATASET_TEST_OUTPUT}_{out_model}_d{depth}_w{width}.parquet"
     df_te.to_parquet(PATH_DATA / out_test, index=False)
-    logger.info(f"Dataset salvo: {out_test}")
-    exp_logger.log_message(f"Split salvo em: {split_path}")
-    exp_logger.metadata.update({
+    logger.log_message(f"Dataset salvo: {out_test}")
+    logger.log_message(f"Split salvo em: {split_path}")
+    logger.metadata.update({
         "config_path": str(CONFIG_PATH),
         "config_hash": CONFIG_HASH,
         "dataset_path": str(parquet_path),
@@ -131,9 +133,13 @@ def train_mlp_epoch(
         "split_test_frac": SPLIT_TEST_FRAC,
     })
 
-    test_ds = DataProcess(df_te, feat_cols, target_cols, 
-                         x_scaler=(train_ds.x_mu, train_ds.x_sd), 
-                         y_scaler=(train_ds.y_mu, train_ds.y_sd))
+    test_ds = DataProcess(
+                    df_te, 
+                    feat_cols, 
+                    target_cols, 
+                    x_scaler=(train_ds.x_mu, train_ds.x_sd), 
+                    y_scaler=(train_ds.y_mu, train_ds.y_sd)
+                )
     val_loader_kwargs = {
         "batch_size": batch_data,
         "shuffle": False,
@@ -150,7 +156,7 @@ def train_mlp_epoch(
     in_dim = len(feat_cols)
     out_dim = len(target_cols)
     net = MLP(in_dim=in_dim, out_dim=out_dim, width=width, depth=depth, act=nn.Tanh).to(DEVICE)
-    logger.info(f"Model device: {next(net.parameters()).device}")
+    logger.log_message(f"Model device: {next(net.parameters()).device}")
 
     opt = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=lr_wd)
 
@@ -164,6 +170,7 @@ def train_mlp_epoch(
 
     # Instancia a classe de treino
     trainer = BaseTrainer(net, opt, scheduler, model_path, DEVICE, patience_es)
+    history = []
 
     # ---- Treino supervisionado (dados)
     for ep in range(1, epochs + 1):
@@ -176,13 +183,18 @@ def train_mlp_epoch(
 
         trainer.update_best_model(loss_val)
         
-        if trainer.stop_improve():
-            logger.info(f"Early stopping (val não melhorou). Melhor loss_val: {trainer.best_val:.6e}")
-            break
+        # Armazena histórico de loss
+        history.append({
+            "epoch": ep,
+            "loss_total": loss_train,
+            "loss_val": loss_val,
+            "lr": opt.param_groups[0]['lr']
+        })
+
 
         if ep % 10 == 0 or ep == 1:
             # salva os logs por epochs
-            exp_logger.log_epoch(
+            logger.log_epoch(
                 stage="MLP",
                 epoch=ep,
                 loss_train=loss_train,
@@ -190,26 +202,21 @@ def train_mlp_epoch(
                 lr=trainer.optimizer.param_groups[0]["lr"],
                 best_val=trainer.best_val
             )
-            logger.info(
-                f"[MLP] ep={ep:03d} "
-                f"loss_train={loss_train:.6e} | "
-                f"loss_val={loss_val:.6e} | "
-                f"lr={opt.param_groups[0]['lr']:.2e}"
-            )
+        # Valida Earling Stop
+        if trainer.stop_improve():
+            logger.log_message(f"Early stopping (val não melhorou). Melhor loss_val: {trainer.best_val:.6e}")
+            break
     
+    df_hist = pd.DataFrame(history)
+    df_hist.to_csv(PATH_LOG_EXP / f'mlp_loss_history_{cfg["experiment"]["name"]}_{timestamp}.csv', index=False)
     return trainer, (train_ds.x_mu, train_ds.x_sd), (train_ds.y_mu, train_ds.y_sd)
 
 # ---------------------------------
 # Treinar a MLP e avaliar
 # ---------------------------------
-logger.info("="*80)
-logger.info("Iniciando experimento")
-logger.info(cfg["experiment"]["name"])
-logger.info("="*80)
 
 # Iniciando a coleta dos logs
-exp_logger.start()
-
+logger.start()
 
 trainer, xscaler, yscaler = train_mlp_epoch(
     parquet_path=PATH_DATA / cfg["dataset"]["parquet"],
@@ -231,30 +238,100 @@ trainer, xscaler, yscaler = train_mlp_epoch(
 # salvar modelo e scalers
 joblib.dump(xscaler, PATH_MODEL / "mlp_scaler_X.pkl")
 joblib.dump(yscaler, PATH_MODEL / "mlp_scaler_Y.pkl")
-logger.info(f"Scalers da MLP salvos em:{PATH_MODEL}")
+logger.log_message(f"Scalers da MLP salvos em:{PATH_MODEL}")
 
 evaluation_result = run_metrics_pipeline(
     cfg=cfg,
     model_path=trainer.model_path,
-    dataset_path=PATH_DATA / f"{DATASET_TEST_OUTPUT}_{cfg['experiment']['name']}_d{cfg['model']['depth']}_w{cfg['model']['width']}.parquet",
+    dataset_path=(
+        PATH_DATA 
+        / (
+            f"{DATASET_TEST_OUTPUT}"
+            f"_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}.parquet"
+        )
+    ),
     xscaler_path=PATH_MODEL / "mlp_scaler_X.pkl",
     yscaler_path=PATH_MODEL / "mlp_scaler_Y.pkl",
-    metrics_path=PATH_METRIC / f"{cfg['experiment']['name']}_d{cfg['model']['depth']}_w{cfg['model']['width']}_seed{cfg['experiment']['seed']}.json",
-    predictions_path=PATH_METRIC / f"{cfg['experiment']['name']}_d{cfg['model']['depth']}_w{cfg['model']['width']}_seed{cfg['experiment']['seed']}_predictions.parquet",
-    plots_dir=PATH_PLOT / f"mlp_{cfg['experiment']['name']}_d{cfg['model']['depth']}_w{cfg['model']['width']}_seed{cfg['experiment']['seed']}",
+    metrics_path=(
+        PATH_METRIC_EXP 
+        / (
+            f"mlp_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}.json"
+        )
+    ),
+    predictions_path=(
+        PATH_METRIC_EXP 
+        / (
+            f"mlp_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}_predictions.parquet"
+        )
+    ),
+    plots_dir=(
+        PATH_PLOT 
+        / (
+            f"mlp_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}"
+            f"_{timestamp}"
+        )
+    ),
     batch_size=cfg["training"]["batch_size"],
     logger=logger,
 )
 
-# Fechando o log de métricas
-exp_logger.finish(final_metrics={
-    "best_val": trainer.best_val,
-    "model_path": str(trainer.model_path),
-    "evaluation": evaluation_result,
-})
+logger.log_message("Iniciando avaliação física da MLP no domínio completo.")
 
-logger.info("="*80)
-logger.info("Treino finalizado")
-logger.info(f"Melhor loss: {trainer.best_val:.6e}")
-logger.info(f"Modelo salvo: {trainer.model_path}")
-logger.info("="*80)
+physics_result = run_physics_metrics_pipeline(
+    cfg=cfg,
+    model_path=trainer.model_path,
+    dataset_full_path=PATH_DATA / cfg["dataset"]["parquet"],
+    xscaler_path=PATH_MODEL / "mlp_scaler_X.pkl",
+    yscaler_path=PATH_MODEL / "mlp_scaler_Y.pkl",
+    metrics_path=(
+        PATH_METRIC_EXP
+        / (
+            f"mlp_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}"
+            f"_physics.json"
+        )
+    ),
+    predictions_path=(
+        PATH_METRIC_EXP
+        / (
+            f"mlp_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}"
+            f"_physics_predictions.parquet"
+        )
+    ),
+    batch_size=cfg["training"]["batch_size"],
+    plots_dir= (
+        PATH_PLOT 
+        / (
+            f"mlp_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}"
+            f"_{timestamp}"
+        )
+    )
+)
+
+logger.finish(
+    final_metrics={
+        "best_val": trainer.best_val,
+        "model_path": str(trainer.model_path),
+        "evaluation_data": evaluation_result,
+        "evaluation_physics": physics_result,
+    }
+)

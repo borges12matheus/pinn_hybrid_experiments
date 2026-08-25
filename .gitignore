@@ -8,5 +8,13 @@ wheels/
 
 # Virtual environments
 .venv
+uv.lock
+pyproject.toml
+.python-version
 
 # Paths
+data/
+results/models/
+results/plots/
+results/metrics/
+logs/

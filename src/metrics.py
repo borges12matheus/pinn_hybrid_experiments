@@ -123,7 +123,7 @@ def evaluate_metrics(
     l2_corr_p   = l2_relative_p(p_hat, p_f)
 
     # -------------------------------------------------
-    # Métricas de dados e física
+    # Métricas de dados
     # -------------------------------------------------
 
     metrics = {
@@ -148,18 +148,17 @@ def evaluate_metrics(
         "N": int(len(df)),
     }
 
-    if out_metrics is not None:
-        out_metrics = Path(out_metrics)
-        out_metrics.parent.mkdir(parents=True, exist_ok=True)
-        with open(out_metrics, "w") as f:
-            json.dump(metrics, f, indent=2)
+    model_label = str(model_metrics or model.__class__.__name__)
 
-    if out_predictions is not None:
-        out_predictions = Path(out_predictions)
-        out_predictions.parent.mkdir(parents=True, exist_ok=True)
-        pred_df.to_parquet(out_predictions, index=False)
+    print("\n========================================================")
+    print(f"      RESULTADOS DO MODELO ({model_label.upper()})")
+    print("========================================================")
 
-    print(f"\n===== Métricas ({model_metrics}) =====")
+    # ======================================================
+    # MÉTRICAS DE ACURÁCIA
+    # ======================================================
+
+    print("\n===== Métricas de Acurácia =====")
     print(f"MAE vetorial (u,v) (coarse -> fine):      {mae_coarse:.6f}")
     print(f"MAE pressão (p) (coarse -> fine):         {mae_p_coarse:.6f}")
     print(f"MAE vetorial (u,v) (corrigido -> fine):   {mae_corr:.6f}")
@@ -175,14 +174,24 @@ def evaluate_metrics(
     print(f"Melhora (u,v) (MAE):                      {melhora_pct_uv:.2f}%")
     print(f"Melhora (p) (MAE):                        {melhora_pct_p:.2f}%")
 
-    print(f"\n===== Métricas Físicas ({model_metrics}) =====")
+    print(f"\n=====  Comparativo com CFD Fine ({model_label}) =====")
     print(f"L2 relativo (u,v) - Coarse:               {l2_coarse_uv:.6e}")
     print(f"L2 relativo (u,v) - Corrigido:            {l2_corr_uv:.6e}")
     print(f"L2 relativo (p) - Coarse:                 {l2_coarse_p:.6e}")
     print(f"L2 relativo (p) - Corrigido:              {l2_corr_p:.6e}")
+
+
     if out_metrics is not None:
+        out_metrics = Path(out_metrics)
+        out_metrics.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_metrics, "w") as f:
+            json.dump(metrics, f, indent=2)
         print(f"Salvo: {out_metrics}\n")
+
     if out_predictions is not None:
+        out_predictions = Path(out_predictions)
+        out_predictions.parent.mkdir(parents=True, exist_ok=True)
+        pred_df.to_parquet(out_predictions, index=False)
         print(f"Predições salvas em: {out_predictions}\n")
 
     if return_predictions:
