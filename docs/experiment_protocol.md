@@ -46,19 +46,22 @@ O fluxo foi organizado em etapas claras:
 ## 3. Estrutura do projeto
 
 Arquivos principais:
-- `src/train_mlp.py`: treinamento principal
+- `src/train_mlp.py`: treinamento principal da MLP
+- `src/train_pinn.py`: treinamento principal da PINN (continuidade e, opcionalmente, momento)
+- `src/run_baseline_pair.py`: orquestra o par MLP/PINN baseline
 - `src/run_metrics.py`: avaliação final e gráficos
 - `src/train_utils.py`: dataset, MLP e trainer
 - `src/metrics.py`: métricas quantitativas
 - `src/plots.py`: visualizações
 - `src/logger.py`: logs e metadata do experimento
-- `configs/mlp_base.yaml`: configuração-base
+- `configs/baseline/mlp_base.yaml`: configuração-base da MLP
+- `configs/baseline/pinn_cont_base.yaml`: configuração-base da PINN
 - `docker-compose.yml`: execução com GPU
 - `Dockerfile`: imagem base do ambiente
 
 ## 4. Configuração experimental
 
-O arquivo `configs/mlp_base.yaml` é a fonte de verdade do experimento.
+O arquivo `configs/baseline/mlp_base.yaml` é a fonte de verdade do experimento MLP baseline.
 
 Parâmetros principais:
 - `experiment.name`: nome do experimento
@@ -131,33 +134,34 @@ No treino também são fixados:
 
 ### 7.1 Via Docker Compose
 
-Treino completo:
+Par baseline completo (MLP + PINN + comparação):
 ```bash
-docker compose up --build train
+docker compose up --build run_train_pipeline
 ```
 
-Apenas métricas e plots:
+Treino isolado:
 ```bash
-docker compose --profile metrics run --rm metrics
+docker compose up --build train_mlp
+docker compose up --build train_pinn
 ```
 
 ### 7.2 Localmente
 
 Treino completo:
 ```bash
-python src/train_mlp.py --config configs/mlp_base.yaml
+python src/train_mlp.py --config configs/baseline/mlp_base.yaml
 ```
 
 Apenas avaliação:
 ```bash
-python src/run_metrics.py --config configs/mlp_base.yaml
+python src/run_metrics.py --config configs/baseline/mlp_base.yaml
 ```
 
 ## 8. Entrada esperada
 
-O dataset principal deve existir em:
+O dataset principal deve existir conforme `dataset.parquet` da config usada. Na config baseline atual:
 ```text
-data/data_processed/dataset_bfs_2d_kepsilon_with_wz.parquet
+data/data_processed/dataset_bfs_2d_kepsilon_Re36000_full.parquet
 ```
 
 Colunas esperadas incluem:
@@ -235,8 +239,10 @@ Arquivos importantes:
 
 ### Validação mínima
 ```bash
-python -m py_compile src/train_mlp.py src/train_utils.py src/metrics.py src/logger.py src/plots.py src/run_metrics.py
+python -m py_compile src/*.py
+pytest tests/
 ```
+Essa mesma validação roda automaticamente via GitHub Actions (`.github/workflows/ci.yml`) a cada push/PR para `dev` e `main`.
 
 ### Validação de GPU no host
 ```bash
@@ -273,7 +279,6 @@ Depois de rodar:
 - O modelo e o pipeline estão otimizados para comparação experimental, não para treino massivamente escalável.
 - A ocupação da GPU pode ficar baixa se o dataset for pequeno ou se o pipeline de dados for o gargalo.
 - O split atual é espacial em `x`; se a distribuição do problema exigir, pode ser necessário evoluir para um split mais rico.
-- O arquivo `src/train_pinn.py` está fora do fluxo principal atual.
 
 ## 16. Como manter o experimento consistente
 
@@ -288,15 +293,15 @@ Para evitar divergências entre execuções:
 
 Fluxo recomendado:
 1. preparar dataset
-2. ajustar `configs/mlp_base.yaml` se necessário
-3. rodar `docker compose up --build train`
+2. ajustar `configs/baseline/mlp_base.yaml` / `configs/baseline/pinn_cont_base.yaml` se necessário
+3. rodar `docker compose up --build run_train_pipeline`
 4. revisar métricas e plots gerados
 5. repetir o experimento apenas com mudanças explícitas
 
 ## 18. Snapshot do primeiro resultado
 
 O primeiro run válido do fluxo atual está documentado em:
-- `docs/experiment_results_snapshot.md`
+- `docs/experiments_results/experiment_results_snapshot.md`
 
 Esse arquivo registra:
 - ambiente observado
