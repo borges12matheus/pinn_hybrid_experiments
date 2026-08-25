@@ -4,7 +4,7 @@ Pipeline experimental para treinar uma MLP corretora em um caso BFS 2D, com foco
 
 Documentação detalhada:
 - `docs/experiment_protocol.md`
-- `docs/experiment_results_snapshot.md`
+- `docs/experiments_results/experiment_results_snapshot.md`
 
 ## O que este projeto faz
 - Treina a MLP a partir de um dataset Parquet processado.
@@ -14,41 +14,47 @@ Documentação detalhada:
 
 ## Estrutura principal
 - `src/train_mlp.py`: treino principal da MLP.
+- `src/train_pinn.py`: treino principal da PINN (continuidade e, opcionalmente, momento).
+- `src/run_baseline_pair.py`: orquestra o par MLP/PINN baseline e gera a comparação.
 - `src/run_metrics.py`: avaliação final, métricas e geração de plots.
 - `src/metrics.py`: cálculo das métricas.
 - `src/plots.py`: geração dos gráficos.
 - `src/train_utils.py`: dataset, MLP e trainer.
-- `configs/mlp_base.yaml`: configuração padrão do experimento MLP.
-- `configs/pinn_base.yaml`: configuração espelhada para o experimento PINN.
-- `configs/pinn_cont_v1.yaml` e `configs/pinn_cont_mom_v1.yaml`: variantes do PINN por formulação física.
+- `configs/baseline/mlp_base.yaml`: configuração padrão do experimento MLP.
+- `configs/baseline/pinn_cont_base.yaml`: configuração espelhada para o experimento PINN.
+- `configs/physics_cont/pinn_cont_v1.yaml` e `configs/physics_cont_mom/pinn_cont_mom_v1.yaml`: variantes do PINN por formulação física.
 - `docker-compose.yml`: execução com GPU e volumes padronizados.
 
 ## Requisitos
 - Docker com suporte a GPU.
 - `docker compose` instalado.
-- Dataset disponível em `data/data_processed/dataset_bfs_2d_kepsilon_with_wz.parquet`.
+- Dataset disponível conforme `dataset.parquet` da config usada (baseline atual: `data/data_processed/dataset_bfs_2d_kepsilon_Re36000_full.parquet`).
 
 ## Como executar com Docker
 
-### Treino completo
+### Par baseline completo (MLP + PINN + comparação)
 ```bash
-docker compose up --build train
+docker compose up --build run_train_pipeline
 ```
 
-### Apenas métricas e plots
+### Treino isolado
 ```bash
-docker compose --profile metrics run --rm metrics
+docker compose up --build train_mlp
+docker compose up --build train_pinn
 ```
+
+Os demais serviços (`prepare_train_data`, `train_pinn_cont_mom`, `benchmark_mlp`, `benchmark_pinn`, `clean_experiments`, `compare_experiments`) estão listados em `docker-compose.yml`.
 
 ## Como executar localmente
 ### Treino completo
 ```bash
-python src/train_mlp.py --config configs/mlp_base.yaml
+python src/train_mlp.py --config configs/baseline/mlp_base.yaml
+python src/train_pinn.py --config configs/baseline/pinn_cont_base.yaml
 ```
 
 ### Apenas avaliação final
 ```bash
-python src/run_metrics.py --config configs/mlp_base.yaml
+python src/run_metrics.py --config configs/baseline/mlp_base.yaml
 ```
 
 ## Saídas geradas
@@ -77,8 +83,10 @@ Além disso, o container fixa:
 
 ## Validação rápida
 ```bash
-python -m py_compile src/train_mlp.py src/train_utils.py src/metrics.py src/logger.py src/plots.py src/run_metrics.py
+python -m py_compile src/*.py
+pytest tests/
 ```
+Essa mesma validação roda automaticamente via GitHub Actions (`.github/workflows/ci.yml`) a cada push/PR para `dev` e `main`.
 
 ## Observações
 - O treino já chama automaticamente o pós-processamento ao terminar.

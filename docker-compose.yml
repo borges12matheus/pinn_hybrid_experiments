@@ -53,22 +53,22 @@ services:
   train_pinn_cont_mom:
     <<: *common
     container_name: bfs_2d_pinn_train_cont_mom_v1
-    command: python src/train_pinn.py --config configs/pinn_cont_mom_v1.yaml
+    command: python src/train_pinn.py --config configs/physics_cont_mom/pinn_cont_mom_v1.yaml
 
   benchmark_mlp:
     <<: *common
     container_name: bfs_2d_mlp_benchmark
-    command: python src/run_external_benchmark.py 
-        --config configs/mlp_v3.yaml 
-        --model-path results/models/mlp_v3_d4_w64.pt 
+    command: python src/run_external_benchmark.py
+        --config configs/physics_cont/mlp_v3.yaml
+        --model-path results/models/mlp_v3_d4_w64.pt
         --training-reynolds 32000
   
   benchmark_pinn:
     <<: *common
     container_name: bfs_2d_pinn_benchmark
-    command: python src/run_external_benchmark.py 
-      --config configs/pinn_cont_v3.yaml 
-      --model-path results/models/pinn_cont_v3_d4_w64.pt 
+    command: python src/run_external_benchmark.py
+      --config configs/physics_cont/pinn_cont_v3.yaml
+      --model-path results/models/pinn_cont_v3_d4_w64.pt
       --training-reynolds 32000
 
   clean_experiments:
