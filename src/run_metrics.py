@@ -126,7 +126,7 @@ def run_metrics_pipeline(
             field_f,
             field_corr,
             title=label,
-            save_path=plots_dir / f"{label}_field_compare.png",
+            save_path=plots_dir / f"{model_type}_{exp_name}_{label}_field_compare.png",
         )
 
         plot_error_compare(
@@ -135,7 +135,7 @@ def run_metrics_pipeline(
             field_f,
             field_corr,
             label=label,
-            save_path=plots_dir / f"{label}_error_compare.png",
+            save_path=plots_dir / f"{model_type}_{exp_name}_{label}_error_compare.png",
         )
 
         plot_error_histogram(
@@ -144,7 +144,7 @@ def run_metrics_pipeline(
             field_f,
             field_corr,
             label=label,
-            save_path=plots_dir / f"{label}_error_hist.png",
+            save_path=plots_dir / f"{model_type}_{exp_name}_{label}_error_hist.png",
         )
 
     logger.log_message(f"Avaliacao concluida. Metrics: {metrics_path}")

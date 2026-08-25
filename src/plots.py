@@ -313,6 +313,7 @@ def plot_divergence_compare(
     h=0.0127,
     percentile=99.0,
     absolute=True,
+    vmax_fixed=None,
     save_path=None,
     show=False,
     close=True,
@@ -356,7 +357,7 @@ def plot_divergence_compare(
     titles = [
         "CFD coarse",
         "CFD fine",
-        "Corrigido",
+        f"{model_name.upper()} Corrigido",
     ]
 
     values = [
@@ -375,20 +376,26 @@ def plot_divergence_compare(
     if absolute:
         values = [np.abs(value) for value in values]
 
-        vmax = np.nanpercentile(
-            np.concatenate(values),
-            percentile,
-        )
+        if vmax_fixed is None:
+            vmax = np.nanpercentile(
+                np.concatenate(values),
+                percentile,
+            )
+        else:
+            vmax = float(vmax_fixed)
 
         vmin = 0.0
         cmap = "inferno"
         colorbar_label = r"$|\nabla\cdot\mathbf{U}|$ [s$^{-1}$]"
 
     else:
-        vmax = np.nanpercentile(
-            np.abs(finite_values),
-            percentile,
-        )
+        if vmax_fixed is None:
+            vmax = np.nanpercentile(
+                np.abs(finite_values),
+                percentile,
+            )
+        else:
+            vmax = float(vmax_fixed)
 
         vmin = -vmax
         cmap = "coolwarm"
@@ -438,7 +445,193 @@ def plot_divergence_compare(
     mode = "Módulo" if absolute else "Campo assinado"
 
     fig.suptitle(
-        f"{mode} da divergência — {model_name}",
+        f"{mode} da divergência — {model_name.upper()}",
+        fontsize=14,
+    )
+
+    _finalize_figure(
+        fig,
+        save_path=save_path,
+        show=show,
+        close=close,
+    )
+
+def plot_divergence_mlp_pinn_compare(
+    df_mlp,
+    df_pinn,
+    mlp_field="div_corrected",
+    pinn_field="div_corrected",
+    coarse_field="div_u",
+    fine_field="div_u_f",
+    h=0.0127,
+    percentile=99.0,
+    absolute=True,
+    vmax_fixed=None,
+    save_path=None,
+    show=False,
+    close=True,
+):
+    """
+    Compara CFD coarse, CFD fine, MLP e PINN usando uma única escala.
+
+    Espera que os dois DataFrames correspondam ao mesmo domínio espacial.
+    """
+
+    required_mlp = {
+        "x",
+        "y",
+        coarse_field,
+        fine_field,
+        mlp_field,
+    }
+
+    required_pinn = {
+        "x",
+        "y",
+        pinn_field,
+    }
+
+    missing_mlp = required_mlp - set(df_mlp.columns)
+    missing_pinn = required_pinn - set(df_pinn.columns)
+
+    if missing_mlp:
+        raise ValueError(
+            f"Colunas ausentes no DataFrame MLP: {sorted(missing_mlp)}"
+        )
+
+    if missing_pinn:
+        raise ValueError(
+            f"Colunas ausentes no DataFrame PINN: {sorted(missing_pinn)}"
+        )
+
+    if len(df_mlp) != len(df_pinn):
+        raise ValueError(
+            "MLP e PINN possuem quantidades diferentes de pontos."
+        )
+
+    x_mlp = df_mlp["x"].to_numpy(dtype=np.float64)
+    y_mlp = df_mlp["y"].to_numpy(dtype=np.float64)
+
+    x_pinn = df_pinn["x"].to_numpy(dtype=np.float64)
+    y_pinn = df_pinn["y"].to_numpy(dtype=np.float64)
+
+    if not (
+        np.allclose(x_mlp, x_pinn, rtol=0.0, atol=1e-10)
+        and np.allclose(y_mlp, y_pinn, rtol=0.0, atol=1e-10)
+    ):
+        raise ValueError(
+            "Os pontos espaciais da MLP e da PINN não estão alinhados."
+        )
+
+    x = x_mlp / h
+    y = y_mlp / h
+
+    fields = [
+        df_mlp[coarse_field].to_numpy(dtype=np.float64),
+        df_mlp[fine_field].to_numpy(dtype=np.float64),
+        df_mlp[mlp_field].to_numpy(dtype=np.float64),
+        df_pinn[pinn_field].to_numpy(dtype=np.float64),
+    ]
+
+    titles = [
+        "CFD coarse",
+        "CFD fine",
+        "MLP corrigida",
+        "PINN corrigida",
+    ]
+
+    finite_values = np.concatenate([
+        value[np.isfinite(value)]
+        for value in fields
+    ])
+
+    if finite_values.size == 0:
+        raise ValueError(
+            "Nenhum valor finito encontrado nos campos de divergência."
+        )
+
+    if absolute:
+        plot_values = [
+            np.abs(value)
+            for value in fields
+        ]
+
+        if vmax_fixed is None:
+            vmax = np.nanpercentile(
+                np.concatenate(plot_values),
+                percentile,
+            )
+        else:
+            vmax = float(vmax_fixed)
+
+        vmin = 0.0
+        cmap = "inferno"
+        colorbar_label = (
+            r"$|\nabla\cdot\mathbf{U}|$ [s$^{-1}$]"
+        )
+        title = "Módulo da divergência — comparação MLP × PINN"
+
+    else:
+        plot_values = fields
+
+        if vmax_fixed is None:
+            vmax = np.nanpercentile(
+                np.abs(finite_values),
+                percentile,
+            )
+        else:
+            vmax = float(vmax_fixed)
+
+        vmin = -vmax
+        cmap = "coolwarm"
+        colorbar_label = (
+            r"$\nabla\cdot\mathbf{U}$ [s$^{-1}$]"
+        )
+        title = "Divergência assinada — comparação MLP × PINN"
+
+    if not np.isfinite(vmax) or vmax <= 0:
+        vmax = 1.0
+
+    fig, axes = plt.subplots(
+        1,
+        4,
+        figsize=(28, 4.5),
+        constrained_layout=True,
+    )
+
+    scatter = None
+
+    for ax, values, subtitle in zip(
+        axes,
+        plot_values,
+        titles,
+    ):
+        scatter = ax.scatter(
+            x,
+            y,
+            c=values,
+            s=4,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            rasterized=True,
+        )
+
+        ax.set_title(subtitle)
+        ax.set_xlabel(r"$x/H$")
+        ax.set_ylabel(r"$y/H$")
+        ax.set_xlim([-130, 50])
+        ax.set_ylim([0, 9])
+        ax.set_aspect("auto")
+
+    fig.colorbar(
+        scatter,
+        ax=axes,
+        label=colorbar_label,
+    )
+
+    fig.suptitle(
+        title,
         fontsize=14,
     )
 
@@ -514,7 +707,7 @@ def plot_divergence_error(
     )
 
     ax.set_title(
-        f"Erro de divergência — {model_name} menos CFD fine"
+        f"Erro de divergência — {model_name.upper()} menos CFD fine"
     )
     ax.set_xlabel(r"$x/H$")
     ax.set_ylabel(r"$y/H$")
@@ -526,6 +719,161 @@ def plot_divergence_error(
         scatter,
         ax=ax,
         label=r"$\nabla\cdot U_{corr}-\nabla\cdot U_{fine}$ [s$^{-1}$]",
+    )
+
+    _finalize_figure(
+        fig,
+        save_path=save_path,
+        show=show,
+        close=close,
+    )
+
+def plot_divergence_error_mlp_pinn(
+    df_mlp,
+    df_pinn,
+    mlp_field="div_corrected",
+    pinn_field="div_corrected",
+    fine_field="div_u_f",
+    h=0.0127,
+    percentile=99.0,
+    vmax_fixed=None,
+    save_path=None,
+    show=False,
+    close=True,
+):
+    """
+    Compara o erro de divergência da MLP e da PINN
+    em relação ao CFD fine.
+    """
+
+    required_mlp = {
+        "x",
+        "y",
+        mlp_field,
+        fine_field,
+    }
+
+    required_pinn = {
+        "x",
+        "y",
+        pinn_field,
+        fine_field,
+    }
+
+    missing_mlp = required_mlp - set(df_mlp.columns)
+    missing_pinn = required_pinn - set(df_pinn.columns)
+
+    if missing_mlp:
+        raise ValueError(
+            f"Colunas ausentes na MLP: {sorted(missing_mlp)}"
+        )
+
+    if missing_pinn:
+        raise ValueError(
+            f"Colunas ausentes na PINN: {sorted(missing_pinn)}"
+        )
+
+    if len(df_mlp) != len(df_pinn):
+        raise ValueError(
+            "MLP e PINN possuem quantidades diferentes de pontos."
+        )
+
+    x_mlp = df_mlp["x"].to_numpy(dtype=np.float64)
+    y_mlp = df_mlp["y"].to_numpy(dtype=np.float64)
+
+    x_pinn = df_pinn["x"].to_numpy(dtype=np.float64)
+    y_pinn = df_pinn["y"].to_numpy(dtype=np.float64)
+
+    if not (
+        np.allclose(x_mlp, x_pinn, rtol=0.0, atol=1e-10)
+        and np.allclose(y_mlp, y_pinn, rtol=0.0, atol=1e-10)
+    ):
+        raise ValueError(
+            "Os pontos espaciais da MLP e da PINN não estão alinhados."
+        )
+
+    x = x_mlp / h
+    y = y_mlp / h
+
+    error_mlp = (
+        df_mlp[mlp_field].to_numpy(dtype=np.float64)
+        - df_mlp[fine_field].to_numpy(dtype=np.float64)
+    )
+
+    error_pinn = (
+        df_pinn[pinn_field].to_numpy(dtype=np.float64)
+        - df_pinn[fine_field].to_numpy(dtype=np.float64)
+    )
+
+    errors = np.concatenate([
+        error_mlp[np.isfinite(error_mlp)],
+        error_pinn[np.isfinite(error_pinn)],
+    ])
+
+    if errors.size == 0:
+        raise ValueError(
+            "Nenhum erro de divergência finito foi encontrado."
+        )
+
+    if vmax_fixed is None:
+        vmax = np.nanpercentile(
+            np.abs(errors),
+            percentile,
+        )
+    else:
+        vmax = float(vmax_fixed)
+
+    if not np.isfinite(vmax) or vmax <= 0:
+        vmax = 1.0
+
+    fig, axes = plt.subplots(
+        1,
+        2,
+        figsize=(22, 5),
+        constrained_layout=True,
+    )
+
+    plots = [
+        (
+            axes[0],
+            error_mlp,
+            "Erro de divergência — MLP menos CFD fine",
+        ),
+        (
+            axes[1],
+            error_pinn,
+            "Erro de divergência — PINN menos CFD fine",
+        ),
+    ]
+
+    scatter = None
+
+    for ax, error, title in plots:
+        scatter = ax.scatter(
+            x,
+            y,
+            c=error,
+            s=4,
+            cmap="coolwarm",
+            vmin=-vmax,
+            vmax=vmax,
+            rasterized=True,
+        )
+
+        ax.set_title(title)
+        ax.set_xlabel(r"$x/H$")
+        ax.set_ylabel(r"$y/H$")
+        ax.set_xlim([-130, 50])
+        ax.set_ylim([0, 9])
+        ax.set_aspect("auto")
+
+    fig.colorbar(
+        scatter,
+        ax=axes,
+        label=(
+            r"$\nabla\cdot U_{corr}"
+            r"-\nabla\cdot U_{fine}$ [s$^{-1}$]"
+        ),
     )
 
     _finalize_figure(

@@ -30,7 +30,7 @@ PATH_CFD = ROOT / cfg["paths"]["data_cfd_dir"]
 PATH_MODEL = ROOT / cfg["paths"]["models_dir"] / "mlp" / f"mlp_{cfg['experiment']['name']}_{timestamp}"
 PATH_METRIC = ROOT / cfg["paths"]["metrics_dir"]
 PATH_METRIC_EXP = PATH_METRIC / "mlp" / f"mlp_{cfg['experiment']['name']}_{timestamp}"
-PATH_PLOT = ROOT / cfg["paths"]["plots_dir"] / "mlp" / f"mlp_{cfg['experiment']['name']}_{timestamp}"
+PATH_PLOT = ROOT / cfg["paths"]["plots_dir"] / "mlp"
 PATH_LOG = ROOT / cfg["paths"]["logs_dir"]
 PATH_LOG_EXP = PATH_LOG / "mlp" / f"mlp_{cfg['experiment']['name']}_{timestamp}"
 
@@ -279,6 +279,7 @@ evaluation_result = run_metrics_pipeline(
             f"_d{cfg['model']['depth']}"
             f"_w{cfg['model']['width']}"
             f"_seed{cfg['experiment']['seed']}"
+            f"_{timestamp}"
         )
     ),
     batch_size=cfg["training"]["batch_size"],
@@ -321,6 +322,7 @@ physics_result = run_physics_metrics_pipeline(
             f"_d{cfg['model']['depth']}"
             f"_w{cfg['model']['width']}"
             f"_seed{cfg['experiment']['seed']}"
+            f"_{timestamp}"
         )
     )
 )

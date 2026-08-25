@@ -35,7 +35,7 @@ PATH_CFD = ROOT / cfg["paths"]["data_cfd_dir"]
 PATH_MODEL = ROOT / cfg["paths"]["models_dir"] / "pinn" / f"pinn_{cfg['experiment']['name']}_{timestamp}"
 PATH_METRIC = ROOT / cfg["paths"]["metrics_dir"]
 PATH_METRIC_EXP = PATH_METRIC / "pinn" / f"pinn_{cfg['experiment']['name']}_{timestamp}"
-PATH_PLOT = ROOT / cfg["paths"]["plots_dir"] / "pinn" / f"pinn_{cfg['experiment']['name']}_{timestamp}"
+PATH_PLOT = ROOT / cfg["paths"]["plots_dir"] / "pinn"
 PATH_LOG = ROOT / cfg["paths"]["logs_dir"]
 PATH_LOG_EXP = PATH_LOG / "pinn" / f"pinn_{cfg['experiment']['name']}_{timestamp}"
 
@@ -43,7 +43,7 @@ PATH_LOG_EXP = PATH_LOG / "pinn" / f"pinn_{cfg['experiment']['name']}_{timestamp
 for p in [PATH_DATA, PATH_MODEL, PATH_METRIC_EXP, PATH_PLOT, PATH_LOG_EXP]:
     p.mkdir(parents=True, exist_ok=True)
 
-# Helper de logs
+# Definindo helper de logs
 logger = ExperimentLogger(
     experiment_name=f"pinn_{cfg['experiment']['name']}",
     experiment_type=f"{cfg['experiment']['type']}",
@@ -460,6 +460,7 @@ evaluation_result = run_metrics_pipeline(
             f"_d{cfg['model']['depth']}"
             f"_w{cfg['model']['width']}"
             f"_seed{cfg['experiment']['seed']}"
+            f"_{timestamp}"
         )
     ),
     logs_dir=PATH_LOG_EXP,
@@ -507,6 +508,7 @@ physics_result = run_physics_metrics_pipeline(
             f"_d{cfg['model']['depth']}"
             f"_w{cfg['model']['width']}"
             f"_seed{cfg['experiment']['seed']}"
+            f"_{timestamp}"
         )
     )
 )
