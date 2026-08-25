@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+jobs:
+  validate:
+    name: Validação mínima
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Instalar dependências de validação
+        run: pip install PyYAML pytest
+
+      - name: Checar sintaxe do código-fonte (py_compile)
+        run: python -m py_compile src/*.py
+
+      - name: Checar sintaxe dos configs YAML
+        run: |
+          python -c "
+          import glob, sys, yaml
+          failed = False
+          for path in sorted(glob.glob('configs/**/*.yaml', recursive=True)):
+              try:
+                  with open(path, encoding='utf-8') as f:
+                      yaml.safe_load(f)
+              except yaml.YAMLError as exc:
+                  print(f'YAML inválido em {path}: {exc}')
+                  failed = True
+          sys.exit(1 if failed else 0)
+          "
+
+      - name: Rodar testes (pytest)
+        run: pytest tests/ -q

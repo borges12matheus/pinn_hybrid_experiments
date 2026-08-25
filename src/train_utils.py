@@ -10,7 +10,15 @@ DTYPE = torch.float32
 # Dataset
 # -----------------------------
 class DataProcess(Dataset):
-    def __init__(self, df, feat_cols, target_cols=None, x_scaler=None, y_scaler=None):
+    def __init__(
+            self,
+            df, 
+            feat_cols, 
+            target_cols=None, 
+            x_scaler=None, 
+            y_scaler=None,
+            physics_col=None
+        ):
         self.X = df[feat_cols].to_numpy(dtype=np.float32, copy=True)
         self.has_y = target_cols is not None
         self.Y = (
@@ -48,14 +56,44 @@ class DataProcess(Dataset):
         if self.has_y:
             self.Yn = torch.from_numpy((self.Y - self.y_mu) / self.y_sd).to(DTYPE)
 
+        self.physics_data = None
+
+        if physics_col is not None:
+            if physics_col not in df.columns:
+                raise ValueError(
+                    f"Coluna física ausente: {physics_col}"
+                )
+
+            physics_values = (
+                df[[physics_col]]
+                .to_numpy(dtype=np.float32)
+            )
+
+            if not np.isfinite(physics_values).all():
+                raise ValueError(
+                    f"A coluna física '{physics_col}' contém NaN ou infinito."
+                )
+
+            self.physics_data = torch.tensor(
+                physics_values,
+                dtype=torch.float32,
+            )
+
+
     def __len__(self):
         return self.Xn.shape[0]
 
     def __getitem__(self, idx):
-        if self.has_y:
-            return self.Xn[idx], self.Yn[idx]
-        return self.Xn[idx]
-
+        if self.physics_data is None:
+            if self.has_y:
+                return self.Xn[idx], self.Yn[idx]
+            return self.Xn[idx]
+        
+        return (
+            self.Xn[idx],
+            self.Yn[idx],
+            self.physics_data[idx],
+        )
 
 # -----------------------------
 # 2) Arquitetura Geral MLP
@@ -99,7 +137,13 @@ class BaseTrainer:
         n_train = 0
 
         for batch in dl_data:
-            Xn, Yn = batch
+            if len(batch) < 2:
+                raise ValueError(
+                    "O batch deve conter pelo menos Xn e Yn."
+                )
+
+            Xn = batch[0]
+            Yn = batch[1]
             Xn = Xn.to(self.device, non_blocking=True)
             Yn = Yn.to(self.device, non_blocking=True)
 
@@ -123,9 +167,14 @@ class BaseTrainer:
         val_total = 0.0
         n_val = 0
         with torch.no_grad():
-            for Xv, Yv in dl_val:
-                Xv = Xv.to(self.device, non_blocking=True)
-                Yv = Yv.to(self.device, non_blocking=True)
+            for batch in dl_val:
+                if len(batch) < 2:
+                    raise ValueError(
+                        "Batch inválido: esperado pelo menos Xn e Yn."
+                    )
+
+                Xv = batch[0].to(self.device, non_blocking=True)
+                Yv = batch[1].to(self.device, non_blocking=True)
 
                 pred_v = self.model(Xv)
                 loss_v = torch.mean((pred_v - Yv) ** 2)

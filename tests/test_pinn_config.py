@@ -5,8 +5,8 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MLP_CONFIG = ROOT / "configs" / "mlp_base.yaml"
-PINN_CONFIG = ROOT / "configs" / "pinn_base.yaml"
+MLP_CONFIG = ROOT / "configs" / "baseline" / "mlp_base.yaml"
+PINN_CONFIG = ROOT / "configs" / "baseline" / "pinn_cont_base.yaml"
 
 
 def load_yaml(path):
@@ -28,7 +28,6 @@ class PinnConfigTest(unittest.TestCase):
         pinn_config = load_yaml(PINN_CONFIG)
 
         shared_sections = [
-            "experiment",
             "paths",
             "features",
             "targets",
@@ -40,6 +39,10 @@ class PinnConfigTest(unittest.TestCase):
 
         for section in shared_sections:
             self.assertEqual(pinn_config[section], mlp_config[section])
+
+        # "name" varia por experimento de propósito; type/seed devem bater.
+        self.assertEqual(pinn_config["experiment"]["type"], mlp_config["experiment"]["type"])
+        self.assertEqual(pinn_config["experiment"]["seed"], mlp_config["experiment"]["seed"])
 
         self.assertEqual(pinn_config["dataset"]["parquet"], mlp_config["dataset"]["parquet"])
         self.assertEqual(pinn_config["dataset"]["test_output"], "dataset_test_pinn")

@@ -5,10 +5,10 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MLP_CONFIG = ROOT / "configs" / "mlp_base.yaml"
-PINN_BASE_CONFIG = ROOT / "configs" / "pinn_base.yaml"
-PINN_CONT_CONFIG = ROOT / "configs" / "pinn_cont_v1.yaml"
-PINN_CONT_MOM_CONFIG = ROOT / "configs" / "pinn_cont_mom_v1.yaml"
+MLP_CONFIG = ROOT / "configs" / "baseline" / "mlp_base.yaml"
+PINN_BASE_CONFIG = ROOT / "configs" / "baseline" / "pinn_cont_base.yaml"
+PINN_CONT_CONFIG = ROOT / "configs" / "physics_cont" / "pinn_cont_v1.yaml"
+PINN_CONT_MOM_CONFIG = ROOT / "configs" / "physics_cont_mom" / "pinn_cont_mom_v1.yaml"
 PINN_UTILS = ROOT / "src" / "pinn_utils.py"
 TRAIN_PINN = ROOT / "src" / "train_pinn.py"
 
@@ -34,10 +34,11 @@ class PinnPhysicsTest(unittest.TestCase):
         pinn_cont = load_yaml(PINN_CONT_CONFIG)
         pinn_cont_mom = load_yaml(PINN_CONT_MOM_CONFIG)
 
+        # "features" varia entre variantes PINN por design: cont_v1/v2/v3 e
+        # cont_mom_v1 exigem entradas físicas extras (k, nut_log, wz_log, Re)
+        # para o resíduo de PDE, que a MLP baseline não usa.
         shared_sections = [
-            "experiment",
             "paths",
-            "features",
             "targets",
             "training",
             "early_stopping",
@@ -50,9 +51,17 @@ class PinnPhysicsTest(unittest.TestCase):
             self.assertEqual(pinn_cont[section], mlp[section])
             self.assertEqual(pinn_cont_mom[section], mlp[section])
 
+        self.assertEqual(pinn_base["features"], mlp["features"])
+
+        # "name" varia por experimento de propósito; type/seed devem bater.
+        for config in (pinn_base, pinn_cont, pinn_cont_mom):
+            self.assertEqual(config["experiment"]["type"], mlp["experiment"]["type"])
+            self.assertEqual(config["experiment"]["seed"], mlp["experiment"]["seed"])
+
+        # pinn_cont_v1 e pinn_cont_mom_v1 são iterações legadas presas ao
+        # dataset antigo (with_wz, Re único); só o par baseline atual
+        # (mlp_base / pinn_cont_base) precisa compartilhar o dataset.
         self.assertEqual(pinn_base["dataset"]["parquet"], mlp["dataset"]["parquet"])
-        self.assertEqual(pinn_cont["dataset"]["parquet"], mlp["dataset"]["parquet"])
-        self.assertEqual(pinn_cont_mom["dataset"]["parquet"], mlp["dataset"]["parquet"])
 
     def test_train_pinn_dispatches_physics_mode(self):
         source = TRAIN_PINN.read_text(encoding="utf-8")
