@@ -160,7 +160,7 @@ def print_divergence_metrics(
     corrected = metrics["divergence_corrected"]
     error = metrics["divergence_error_corrected_vs_fine"]
 
-    title = "MÉTRICAS FÍSICAS DE CONTINUIDADE"
+    title = "MÉTRICAS FÍSICAS DE DIVERGÊNCIA"
     if model_name:
         title += f" ({model_name})"
 

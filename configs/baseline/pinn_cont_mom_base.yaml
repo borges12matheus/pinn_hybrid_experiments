@@ -1,5 +1,5 @@
 experiment:
-  name: v3
+  name: cont_mom_base
   type: k_epsilon
   seed: 42
 
@@ -14,8 +14,8 @@ paths:
   logs_dir: logs
 
 dataset:
-  parquet: dataset_bfs_2d_kepsilon_Re20K_28k_36K_with_sxy_wz.parquet
-  test_output: dataset_test_mlp
+  parquet: dataset_bfs_2d_kepsilon_Re36000_full.parquet
+  test_output: dataset_test_pinn
 
 features:
   - x
@@ -23,17 +23,8 @@ features:
   - Ux
   - Uy
   - p
-  - epsilon
-  - k
+  - Re
   - nut_log
-  - wz_log
-  - sxy_log
-  - div_u_log
-  - Re_norm
-  - depsilon
-  - dk
-  - dnut
-  - dwz
 
 targets:
   - dUx
@@ -41,14 +32,14 @@ targets:
   - dp
 
 model:
-  type: mlp
+  type: pinn
   width: 64
   depth: 4
   activation: tanh
 
 training:
   batch_size: 4096
-  epochs: 1500
+  epochs: 1000
   lr: 1e-3
   weight_decay: 1e-6
 
@@ -65,3 +56,12 @@ split:
   bins: 8
   test_frac: 0.2
   version: v1
+
+pinn:
+  physics_mode: cont_mom
+  nut_transform: exp
+  epochs_pre: 1000
+  epochs_phys: 1000
+  w_data: 1.0
+  w_cont: 7.5e-5
+  w_mom: 5e-5

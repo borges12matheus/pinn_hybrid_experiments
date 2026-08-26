@@ -65,6 +65,10 @@ def run_pinn_stage2_epoch(physics_mode, stage2_runner, stage2_kwargs):
         loss_total, loss_data, loss_cont, loss_mom = stage2_result
         return loss_total, loss_data, loss_cont, loss_mom
 
+    if physics_mode == "momentum":
+        loss_total, loss_data, loss_mom = stage2_result
+        return loss_total, loss_data, None, loss_mom
+
     loss_total, loss_data, loss_cont = stage2_result
     return loss_total, loss_data, loss_cont, None
 
@@ -291,7 +295,7 @@ def train_pinn_epoch(
             "device": DEVICE,
             "nut_transform": NUT_TRANSFORM,
         }
-        if PHYSICS_MODE == "cont_mom":
+        if PHYSICS_MODE in ("cont_mom", "momentum"):
             stage2_kwargs["w_mom"] = w_mom
 
         loss_total, loss_data, loss_cont, loss_mom = run_pinn_stage2_epoch(
@@ -324,6 +328,13 @@ def train_pinn_epoch(
                 0.6 * norm_data
                 + 0.2 * norm_cont
                 + 0.2 * norm_mom
+            )
+        elif PHYSICS_MODE == "momentum":
+            norm_mom = val_mom / (ref_mom + 1e-12)
+
+            val_score = (
+                0.7 * norm_data
+                + 0.3 * norm_mom
             )
         else:
             norm_mom = None

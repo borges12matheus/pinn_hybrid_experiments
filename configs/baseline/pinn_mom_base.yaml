@@ -1,5 +1,5 @@
 experiment:
-  name: cont_v2
+  name: mom_base
   type: k_epsilon
   seed: 42
 
@@ -14,7 +14,7 @@ paths:
   logs_dir: logs
 
 dataset:
-  parquet: dataset_bfs_2d_kepsilon_with_sxy_wz.parquet
+  parquet: dataset_bfs_2d_kepsilon_Re36000_full.parquet
   test_output: dataset_test_pinn
 
 features:
@@ -23,17 +23,8 @@ features:
   - Ux
   - Uy
   - p
-  - epsilon
-  - k
-  - nut_log
-  - wz_log
-  - sxy_log
-  - div_u_log
   - Re
-  - depsilon
-  - dk
-  - dnut
-  - dwz
+  - nut_log
 
 targets:
   - dUx
@@ -67,8 +58,10 @@ split:
   version: v1
 
 pinn:
-  physics_mode: continuity
+  physics_mode: momentum
+  nut_transform: exp
   epochs_pre: 1000
-  epochs_phys: 500
+  epochs_phys: 1000
   w_data: 1.0
-  w_cont: 1e-6
+  w_cont: 7.5e-5
+  w_mom: 1e-5

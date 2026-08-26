@@ -35,41 +35,20 @@ services:
   train_pinn:
     <<: *common
     container_name: bfs_2d_pinn_train
-    command: python src/train_pinn.py --config configs/baseline/pinn_cont_base.yaml
+    command: python src/train_pinn.py --config configs/baseline/pinn_mom_base.yaml
 
   run_train_pipeline:
     <<: *common
     container_name: bfs_2d_run_train_pipe
     command: python src/run_baseline_pair.py
       --mlp-config configs/baseline/mlp_base.yaml
-      --pinn-config configs/baseline/pinn_cont_base.yaml
+      --pinn-config configs/baseline/pinn_cont_mom_base.yaml
       --mlp-command "python src/train_mlp.py --config {config}"
       --pinn-command "python src/train_pinn.py --config {config}"
       --mlp-predictions-glob "results/metrics/mlp/**/*_physics_predictions.parquet"
       --pinn-predictions-glob "results/metrics/pinn/**/*_physics_predictions.parquet"
-      --output-dir results/comparisons/baseline_seed42
+      --output-dir results/comparisons/mlp_vs_pinn_cont_mom_seed42
       #--validate-only
-
-  train_pinn_cont_mom:
-    <<: *common
-    container_name: bfs_2d_pinn_train_cont_mom_v1
-    command: python src/train_pinn.py --config configs/pinn_cont_mom_v1.yaml
-
-  benchmark_mlp:
-    <<: *common
-    container_name: bfs_2d_mlp_benchmark
-    command: python src/run_external_benchmark.py 
-        --config configs/mlp_v3.yaml 
-        --model-path results/models/mlp_v3_d4_w64.pt 
-        --training-reynolds 32000
-  
-  benchmark_pinn:
-    <<: *common
-    container_name: bfs_2d_pinn_benchmark
-    command: python src/run_external_benchmark.py 
-      --config configs/pinn_cont_v3.yaml 
-      --model-path results/models/pinn_cont_v3_d4_w64.pt 
-      --training-reynolds 32000
 
   clean_experiments:
     <<: *common
@@ -80,4 +59,4 @@ services:
   compare_experiments:
     <<: *common
     container_name: bfs_2d_compare_exp
-    command: python src/compare_divergence_models.py --mlp-predictions results/metrics/mlp/mlp_base_20260729_184939/mlp_base_d4_w64_seed456_physics_predictions.parquet --pinn-predictions results/metrics/pinn/pinn_cont_base_20260729_185506/pinn_cont_base_d4_w64_seed456_physics_predictions.parquet --output-dir results/comparisons/seed456
+    command: python src/compare_divergence_models.py --mlp-predictions results/metrics/mlp/mlp_base_20260729_192246/mlp_base_d4_w64_seed42_physics_predictions.parquet --pinn-predictions results/metrics/pinn/pinn_mom_base_20260825_215647/pinn_mom_base_d4_w64_seed42_physics_predictions.parquet --output-dir results/comparisons/mlp_pinn_seed42
