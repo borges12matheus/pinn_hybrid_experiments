@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [dev, main]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   validate:
     name: Validação mínima
@@ -42,3 +46,29 @@ jobs:
 
       - name: Rodar testes (pytest)
         run: pytest tests/ -q
+
+  open_pr:
+    name: Abrir PR para dev
+    needs: validate
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Abrir PR para dev (se ainda não existir)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          EXISTING=$(gh pr list --head "$BRANCH" --base dev --state open --json number --jq 'length')
+          if [ "$EXISTING" -gt 0 ]; then
+            echo "Já existe PR aberto de $BRANCH para dev, nada a fazer."
+            exit 0
+          fi
+          gh pr create \
+            --base dev \
+            --head "$BRANCH" \
+            --title "$BRANCH -> dev" \
+            --body "PR aberto automaticamente pelo CI após validação mínima passar em \`$BRANCH\`." \
+          || echo "Não foi possível abrir PR (provavelmente não há commits novos em relação a dev)."
