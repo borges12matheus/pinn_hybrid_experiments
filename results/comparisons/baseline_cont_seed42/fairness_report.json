@@ -198,11 +198,11 @@
   ],
   "warnings": [],
   "pinn_physics": {
-    "pinn.physics_mode": "cont_mom",
+    "pinn.physics_mode": "momentum",
     "pinn.epochs_pre": 1000,
     "pinn.epochs_phys": 1000,
     "pinn.w_data": 1.0,
     "pinn.w_cont": 7.5e-05,
-    "pinn.w_mom": "5e-5"
+    "pinn.w_mom": "1e-5"
   }
 }

@@ -22,7 +22,7 @@ Documentação detalhada:
 - `src/train_utils.py`: dataset, MLP e trainer.
 - `configs/baseline/mlp_base.yaml`: configuração padrão do experimento MLP.
 - `configs/baseline/pinn_cont_base.yaml`: configuração espelhada para o experimento PINN.
-- `configs/physics_cont/pinn_cont_v1.yaml` e `configs/physics_cont_mom/pinn_cont_mom_v1.yaml`: variantes do PINN por formulação física.
+- `configs/physics_cont_mom/pinn_cont_mom_v1.yaml` e `configs/physics_cont_mom/pinn_mom_v1.yaml`: variantes do PINN por formulação física (continuidade+momento e momento isolado).
 - `docker-compose.yml`: execução com GPU e volumes padronizados.
 
 ## Requisitos

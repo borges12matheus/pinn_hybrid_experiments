@@ -219,7 +219,7 @@ def train_pinn_epoch_cont_mom(
     total_mom = 0.0
     n_train = 0
 
-    for Xn, Yn in dl_data:
+    for Xn, Yn, _div_u_coarse in dl_data:
         Xn = Xn.to(device)
         Yn = Yn.to(device)
 
@@ -289,12 +289,106 @@ def train_pinn_epoch_cont_mom(
             total_mom / n_train
     )
 
+# -----------------------------
+# v3) Momento (isolado, sem continuidade)
+# -----------------------------
+def train_pinn_epoch_momentum(
+    net,
+    dl_data,
+    opt,
+    feat_index,
+    x_mu,
+    x_sd,
+    y_mu,
+    y_sd,
+    w_data,
+    w_mom,
+    device,
+    nut_transform="exp",
+    **unused,
+):
+    net.train()
+
+    total_loss = 0.0
+    total_data = 0.0
+    total_mom = 0.0
+    n_train = 0
+
+    for Xn, Yn, _div_u_coarse in dl_data:
+        Xn = Xn.to(device)
+        Yn = Yn.to(device)
+
+        # Loss supervisionada em escala normalizada
+        pred_data = net(Xn)
+        loss_data = torch.mean((pred_data - Yn) ** 2)
+
+        # Recupera X físico
+        X_phys = unnormalize_x(Xn, x_sd, x_mu).detach()
+
+        # x,y com gradiente para autograd
+        x = X_phys[:, [feat_index["x"]]].clone().requires_grad_(True)
+        y = X_phys[:, [feat_index["y"]]].clone().requires_grad_(True)
+
+        # Reinjeta x,y no input físico
+        X_phys_mod = X_phys.clone()
+        X_phys_mod[:, [feat_index["x"]]] = x
+        X_phys_mod[:, [feat_index["y"]]] = y
+
+        # Renormaliza input
+        Xn_mod = (X_phys_mod - x_mu) / x_sd
+
+        # Predição normalizada e desnormalizada
+        pred_phys_n = net(Xn_mod)
+        pred_phys = pred_phys_n * y_sd + y_mu
+
+        # Campos coarse físicos
+        u_c = X_phys[:, [feat_index["Ux"]]]
+        v_c = X_phys[:, [feat_index["Uy"]]]
+        p_c = X_phys[:, [feat_index["p"]]]
+        nut_c = X_phys[:, [feat_index["nut_log"]]]
+        Re = X_phys[:, [feat_index["Re"]]]
+
+        # Continuidade é descartada de propósito: este modo isola o efeito
+        # do resíduo de momento na comparação com "continuity"/"cont_mom".
+        _r_cont, r_mom_u, r_mom_v = pde_residuals_cont_mom(
+            x=x,
+            y=y,
+            u_coarse=u_c,
+            v_coarse=v_c,
+            p_coarse=p_c,
+            nut_coarse=nut_c,
+            Re=Re,
+            model_out=pred_phys,
+            nut_transform=nut_transform,
+        )
+
+        huber = torch.nn.SmoothL1Loss(beta=1.0)
+        loss_mom = huber(r_mom_u, torch.zeros_like(r_mom_u)) + huber(r_mom_v, torch.zeros_like(r_mom_v))
+
+        loss = w_data * loss_data + w_mom * loss_mom
+
+        opt.zero_grad(set_to_none=True)
+        loss.backward()
+        opt.step()
+
+        bs = Xn.size(0)
+        total_loss += loss.item() * bs
+        total_data += loss_data.item() * bs
+        total_mom += loss_mom.item() * bs
+        n_train += bs
+
+    return (total_loss / n_train,
+            total_data / n_train,
+            total_mom / n_train
+    )
+
 #########################################################
 #### Helpers para escolha do modelo físico da PINN
 #########################################################
 PINN_EPOCH_RUNNERS = {
     "continuity": train_pinn_epoch_continuity,
     "cont_mom": train_pinn_epoch_cont_mom,
+    "momentum": train_pinn_epoch_momentum,
 }
 
 def get_pinn_epoch_runner(physics_mode):
@@ -451,6 +545,46 @@ def compute_pinn_losses(
 
                 loss_mom = loss_mom_u + loss_mom_v
 
+            elif physics_mode == "momentum":
+
+                p_c = X_phys[:, [feat_index["p"]]]
+                nut_c = X_phys[:, [feat_index["nut_log"]]]
+                Re = X_phys[:, [feat_index["Re"]]]
+
+                _r_cont, r_mom_u, r_mom_v = (
+                    pde_residuals_cont_mom(
+                        x=x,
+                        y=y,
+                        u_coarse=u_c,
+                        v_coarse=v_c,
+                        p_coarse=p_c,
+                        nut_coarse=nut_c,
+                        Re=Re,
+                        model_out=pred_phys,
+                        nut_transform=nut_transform,
+                    )
+                )
+
+                loss_cont = torch.zeros(
+                    (),
+                    device=device,
+                    dtype=loss_data.dtype,
+                )
+
+                loss_mom_u = torch.nn.functional.smooth_l1_loss(
+                    r_mom_u,
+                    torch.zeros_like(r_mom_u),
+                    beta=1.0,
+                )
+
+                loss_mom_v = torch.nn.functional.smooth_l1_loss(
+                    r_mom_v,
+                    torch.zeros_like(r_mom_v),
+                    beta=1.0,
+                )
+
+                loss_mom = loss_mom_u + loss_mom_v
+
             else:
                 raise ValueError(
                     f"physics_mode inválido: {physics_mode}"
@@ -485,7 +619,7 @@ def compute_pinn_losses(
     mean_data = total_data / n_samples
     mean_cont = total_cont / n_samples
 
-    if physics_mode == "cont_mom":
+    if physics_mode in ("cont_mom", "momentum"):
         mean_mom = total_mom / n_samples
     else:
         mean_mom = None

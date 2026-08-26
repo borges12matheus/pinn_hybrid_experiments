@@ -1,5 +1,5 @@
 experiment:
-  name: cont_v1
+  name: mom_v1
   type: k_epsilon
   seed: 42
 
@@ -26,7 +26,6 @@ features:
   - p
   - k
   - nut_log
-  - wz_log
   - Re
 
 targets:
@@ -61,8 +60,9 @@ split:
   version: v1
 
 pinn:
-  physics_mode: continuity
-  epochs_pre: 1000
-  epochs_phys: 500
+  physics_mode: momentum
+  nut_transform: exp
+  epochs_pre: 500
+  epochs_phys: 300
   w_data: 1.0
-  w_cont: 1e-6
+  w_mom: 1e-5
