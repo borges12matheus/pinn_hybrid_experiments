@@ -191,7 +191,7 @@ def plot_divergence_three_fields(
 
         style_axis(
             ax,
-            *limits,
+            limits,
         )
 
     colorbar = fig.colorbar(
@@ -583,7 +583,7 @@ def plot_pinn_absolute_gain(
 
     style_axis(
         ax,
-        *limits,
+        limits,
     )
 
     ax.set_title(

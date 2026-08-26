@@ -738,6 +738,8 @@ out = df[[
     "sxy_log",
     "div_u_log",
 
+    "Re",
+
     # Parâmetro físico
     "Re_norm",
 

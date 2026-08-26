@@ -4,14 +4,26 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import logging
 import shlex
 import subprocess
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+logger = logging.getLogger("run_baseline_pair")
+
+
+def configure_logging() -> None:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s | %(levelname)s | %(message)s",
+        stream=sys.stdout,
+    )
 
 FAIRNESS_FIELDS: dict[str, list[str]] = {
     "experiment.type": [
@@ -19,9 +31,6 @@ FAIRNESS_FIELDS: dict[str, list[str]] = {
     ],
     "dataset.parquet": [
         "dataset.parquet",
-    ],
-    "features": [
-        "features",
     ],
     "targets": [
         "targets",
@@ -224,6 +233,32 @@ def validate_fairness(mlp_cfg: dict[str, Any], pinn_cfg: dict[str, Any], root: P
         if not equal:
             failures.append(f"Campo incompatível '{label}': MLP={mlp_value!r} | PINN={pinn_value!r}")
 
+    # "features" é reportado à parte, como aviso: variantes PINN legitimamente
+    # precisam de campos físicos extras (ex.: Re, nut_log) para o resíduo de
+    # PDE, que a MLP não usa — não é uma quebra de isonomia experimental.
+    features_mlp_path, features_mlp_value = first_existing(mlp_cfg, ["features"])
+    features_pinn_path, features_pinn_value = first_existing(pinn_cfg, ["features"])
+    if features_mlp_path is None or features_pinn_path is None:
+        msg = "Campo 'features' não localizado em ambos os YAMLs."
+        (warnings if allow_missing else failures).append(msg)
+        features_status = "warning" if allow_missing else "failure"
+    else:
+        features_equal = normalize_value(features_mlp_value) == normalize_value(features_pinn_value)
+        features_status = "ok" if features_equal else "warning"
+        if not features_equal:
+            warnings.append(
+                f"Campo 'features' difere (esperado para variantes PINN com física extra): "
+                f"MLP={features_mlp_value!r} | PINN={features_pinn_value!r}"
+            )
+    checks.append({
+        "field": "features",
+        "status": features_status,
+        "mlp_path": features_mlp_path,
+        "pinn_path": features_pinn_path,
+        "mlp_value": features_mlp_value,
+        "pinn_value": features_pinn_value,
+    })
+
     mlp_epoch_path, mlp_epochs = first_existing(mlp_cfg, MLP_EPOCH_PATHS)
     pinn_pre_path, pinn_pre_epochs = first_existing(pinn_cfg, PINN_PRE_EPOCH_PATHS)
     if mlp_epoch_path is None or pinn_pre_path is None:
@@ -269,12 +304,12 @@ def render_command(template: str, config_path: Path) -> list[str]:
 
 def run_command(command: list[str], cwd: Path, log_path: Path) -> None:
     log_path.parent.mkdir(parents=True, exist_ok=True)
-    print(f"\nExecutando: {shlex.join(command)}")
+    logger.info("Executando: %s", shlex.join(command))
     with log_path.open("w", encoding="utf-8") as log_file:
         process = subprocess.Popen(command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
         assert process.stdout is not None
         for line in process.stdout:
-            print(line, end="")
+            logger.info(line.rstrip())
             log_file.write(line)
         rc = process.wait()
     if rc != 0:
@@ -309,44 +344,51 @@ def collect_pinn_physics_config(
     return result
 
 def main() -> int:
+    configure_logging()
     args = parse_args()
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     root = args.cwd.resolve()
-    output_dir = args.output_dir if args.output_dir.is_absolute() else root / args.output_dir
+    base_output_dir = args.output_dir if args.output_dir.is_absolute() else root / args.output_dir
+    output_dir = base_output_dir.parent / f"{base_output_dir.name}_{timestamp}"
     output_dir.mkdir(parents=True, exist_ok=True)
+    logger.info("Diretório de saída: %s", output_dir)
 
     mlp_config = args.mlp_config if args.mlp_config.is_absolute() else root / args.mlp_config
     pinn_config = args.pinn_config if args.pinn_config.is_absolute() else root / args.pinn_config
 
     report = validate_fairness(load_yaml(mlp_config), load_yaml(pinn_config), root, args.allow_missing_fields)
-    report_path = output_dir / "fairness_report.json"
+    report_path = output_dir / f"fairness_report_{timestamp}.json"
     report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
 
-    print("\n=== Validação de isonomia experimental ===")
+    logger.info("=== Validação de isonomia experimental ===")
     for check in report["checks"]:
-        print(f"[{check['status'].upper():7}] {check['field']}: MLP={check['mlp_value']!r} | PINN={check['pinn_value']!r}")
+        logger.info("[%-7s] %s: MLP=%r | PINN=%r", check["status"].upper(), check["field"], check["mlp_value"], check["pinn_value"])
+    for warning in report["warnings"]:
+        logger.warning("- %s", warning)
 
     if not report["valid"]:
         for failure in report["failures"]:
-            print(f"- {failure}")
+            logger.error("- %s", failure)
         return 2
     if args.validate_only:
         return 0
 
     mlp_before = glob_files(root, args.mlp_predictions_glob)
     t0 = time.time()
-    run_command(render_command(args.mlp_command, mlp_config), root, output_dir / "train_mlp.log")
+    run_command(render_command(args.mlp_command, mlp_config), root, output_dir / f"train_mlp_{timestamp}.log")
     mlp_predictions = newest_new_file(mlp_before, glob_files(root, args.mlp_predictions_glob), t0)
 
     pinn_before = glob_files(root, args.pinn_predictions_glob)
     t1 = time.time()
-    run_command(render_command(args.pinn_command, pinn_config), root, output_dir / "train_pinn.log")
+    run_command(render_command(args.pinn_command, pinn_config), root, output_dir / f"train_pinn_{timestamp}.log")
     pinn_predictions = newest_new_file(pinn_before, glob_files(root, args.pinn_predictions_glob), t1)
 
     comparison_script = args.comparison_script if args.comparison_script.is_absolute() else root / args.comparison_script
     command = [args.python, str(comparison_script), "--mlp-predictions", str(mlp_predictions), "--pinn-predictions", str(pinn_predictions), "--output-dir", str(output_dir / "plots"), "--percentile", str(args.percentile)]
-    run_command(command, root, output_dir / "compare_divergence.log")
+    run_command(command, root, output_dir / f"compare_divergence_{timestamp}.log")
 
     manifest = {
+        "timestamp": timestamp,
         "mlp_config": str(mlp_config),
         "pinn_config": str(pinn_config),
         "mlp_predictions": str(mlp_predictions),
@@ -354,8 +396,8 @@ def main() -> int:
         "fairness_report": str(report_path),
         "comparison_output_dir": str(output_dir / "plots"),
     }
-    (output_dir / "baseline_pair_manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
-    print("\nBaseline concluído com sucesso.")
+    (output_dir / f"baseline_pair_manifest_{timestamp}.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+    logger.info("Baseline concluído com sucesso.")
     return 0
 
 

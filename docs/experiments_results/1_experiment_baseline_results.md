@@ -110,6 +110,8 @@ Resultados obtidos:
 | RMSE (p) | 26.304 | **25.950** |
 | L2 Rel (p) | 0.06576 | **0.06487** |
 
+> **Nota de rastreabilidade (2026-08-26):** o run específico com `w_cont=1e-6` citado acima não está mais localizável nos artefatos atuais do repositório (nem em `logs/pinn/`, nem em `results/comparisons/experiments_publication.csv`, que só retém `w_cont` em {5e-5, 7.5e-5, 1e-4}). Prováveis causas: `src/cleanup_experiments.py` remove execuções por janela de tempo/quantidade, não por desempenho, então o run vencedor pode ter sido descartado por uma limpeza posterior. Os pontos de `w_cont` que seguem replicados (5e-5 a 1e-4, 3 seeds) mostram a PINN de continuidade **atrás** da MLP em acurácia supervisionada (ver `docs/experiments_results/2_experiment_physicis_cont.md`), embora com consistência física muito superior. Este resultado específico deve ser tratado como não reproduzido até que seja refeito e preservado.
+
 ---
 
 # Principais conclusões
@@ -142,21 +144,11 @@ Dessa forma, o ganho observado pode ser atribuído com maior confiança ao efeit
 
 # Próximos experimentos
 
-## Etapa 2 — Validação Física
+## Etapa 2 — Validação Física (concluída)
 
-Calcular métricas independentes de conservação de massa:
+Métricas de conservação de massa (MAE/RMSE/L∞ de `div U`) foram calculadas no domínio completo, comparando CFD coarse, CFD fine, MLP e três formulações de PINN (continuidade, momento isolado, continuidade+momento).
 
-- MAE(div U)
-- RMSE(div U)
-- L2(div U)
-- L∞(div U)
-
-Comparar:
-
-- CFD coarse
-- CFD fine
-- MLP
-- PINN
+Resultados completos em `docs/experiments_results/2_experiment_physicis_cont.md`.
 
 ---
 
