@@ -1,0 +1,7 @@
+model_type,experiment_name,experiment_type,width,depth,activation,features,w_cont,w_mom,mae_uv_corrected,rmse_uv_corrected,mae_p_corrected,rmse_p_corrected,mae_div_corrected,rmse_div_corrected,linf_div_corrected,wall_time_min
+mlp,mlp_base,k_epsilon,64,4,tanh,"x, y, Ux, Uy, p, Re_norm",,,0.695273 ± 0.019092,1.278633 ± 0.049044,16.637347 ± 0.243393,26.304992 ± 0.113630,116.299141 ± 8.955687,434.043925 ± 48.865460,18195.995263 ± 1782.882978,5.169424 ± 1.067392
+pinn,pinn_cont_base,k_epsilon,64,4,tanh,"x, y, Ux, Uy, p, Re_norm",5e-05,1e-05,0.754624,1.349210,17.581047,28.057041,2.878993,4.919715,276.806124,12.485317
+pinn,pinn_cont_base,k_epsilon,64,4,tanh,"x, y, Ux, Uy, p, Re_norm",7.5e-05,1e-05,0.767176 ± 0.026906,1.390107 ± 0.024406,17.840823 ± 0.202532,29.725262 ± 1.115465,2.460958 ± 0.116424,4.442039 ± 0.112278,257.295601 ± 122.639765,13.400795 ± 1.239408
+pinn,pinn_cont_base,k_epsilon,64,4,tanh,"x, y, Ux, Uy, p, Re_norm",0.0001,1e-05,0.835997 ± 0.000000,1.475412 ± 0.000000,18.835859 ± 0.000000,30.270622 ± 0.000000,2.343685 ± 0.000000,4.180474 ± 0.000000,321.861270 ± 0.000000,12.550995 ± 0.146784
+pinn,pinn_cont_mom_base,k_epsilon,64,4,tanh,"x, y, Ux, Uy, p, Re, nut_log",7.5e-05,5e-05,0.877524,1.600874,24.220604,40.345585,2.680035,5.646775,235.165568,20.242668
+pinn,pinn_mom_base,k_epsilon,64,4,tanh,"x, y, Ux, Uy, p, Re, nut_log",7.5e-05,1e-05,0.752155,1.333510,20.061764,32.410992,98.172162,310.123356,8973.723006,12.081335

@@ -1,16 +1,17 @@
 # BFS 2D PINN Corrector
 
-Pipeline experimental para treinar uma MLP corretora em um caso BFS 2D, com foco em reprodutibilidade, comparação justa e execução em container com GPU.
+Pipeline experimental para treinar uma PINN Híbrida corretora em um caso canônico BFS 2D baseado no trabalho de **D.M. Driver and H.L. Seegmiller**, disponibilizado na biblioteca do OPENFOAM, com foco em reprodutibilidade, comparação justa e execução em container com GPU.
 
 Documentação detalhada:
 - `docs/experiment_protocol.md`
 - `docs/experiments_results/experiment_results_snapshot.md`
 
 ## O que este projeto faz
-- Treina a MLP a partir de um dataset Parquet processado.
+- Define um pipeline experimental desde o processamento dos dados de CFD até a construção de modelos comparativos de MLP e PINN híbrida.
+- Treina a MLP e a PINN a partir de um dataset Parquet processado.
 - Usa split espacial estratificado em `x` para evitar vazamento entre treino e teste.
 - Salva modelo, scalers, split, métricas, predições e plots.
-- Executa o pós-processamento automaticamente ao final do treino.
+- Executa o pós-processamento de métricas comparativas automaticamente ao final do treino.
 
 ## Estrutura principal
 - `src/train_mlp.py`: treino principal da MLP.
@@ -28,7 +29,7 @@ Documentação detalhada:
 ## Requisitos
 - Docker com suporte a GPU.
 - `docker compose` instalado.
-- Dataset disponível conforme `dataset.parquet` da config usada (baseline atual: `data/data_processed/dataset_bfs_2d_kepsilon_Re36000_full.parquet`).
+- Dataset disponível conforme `dataset.parquet` da config usada (baseline atual agosto/2026: `data/data_processed/dataset_bfs_2d_kepsilon_Re36000_full.parquet`).
 
 ## Como executar com Docker
 
@@ -92,3 +93,7 @@ Essa mesma validação roda automaticamente via GitHub Actions (`.github/workflo
 - O treino já chama automaticamente o pós-processamento ao terminar.
 - O serviço `metrics` existe no `docker-compose.yml` para rodar a etapa final isoladamente.
 - O split atual é espacial estratificado em `x`, com `bins=8` e `test_frac=0.2`.
+
+## Referências
+- D.M. Driver and H.L. Seegmiller. Features of a reattaching turbulent shear layer in divergent channel flow. AIAA Journal, 23(2):163–171, 1985.
+- OpenFOAM. Disponível em: https://doc.openfoam.com/2606/

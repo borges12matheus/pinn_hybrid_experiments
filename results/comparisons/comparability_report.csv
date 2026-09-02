@@ -1,0 +1,8 @@
+field,n_unique,comparable,values
+dataset_hash,2,False,8f6558889c23c5184d16fc3a3f2b428ab9dd08a3a6980a5b18278273fcfbae67 | ce6b9b25461013481af116021cfe6f08f5f0dd85be76589d7a3d46be70ae422b
+split_hash,3,False,55875800c868ce36e0554e8bf4ff082b53becd7e513e5b3e4b51b093c27aefd6 | bdcb67e67aba4ba27ae3faf069aa6d24c5c8423c062402ddaf150946db94d1cd | 232b9dcacce9fbcb42623ba951c0a2be5526feecabbe476d60e2e1c0e70250af
+features,2,False,"x, y, Ux, Uy, p, Re_norm | x, y, Ux, Uy, p, Re, nut_log"
+split_method,1,True,spatial_x_quantile_x_v1
+split_test_frac,1,True,0.2
+dataset,1,True,dataset_bfs_2d_kepsilon_Re36000_full.parquet
+experiment_type,1,True,k_epsilon

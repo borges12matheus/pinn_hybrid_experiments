@@ -64,4 +64,4 @@ pinn:
   epochs_phys: 1000
   w_data: 1.0
   w_cont: 7.5e-5
-  w_mom: 5e-5
+  w_mom: 1e-6

@@ -1,0 +1,175 @@
+2026-08-27 01:45:47,613 | INFO | Dispositivo do experimento: cuda
+2026-08-27 01:45:47,614 | INFO | ================================================================================
+2026-08-27 01:45:47,614 | INFO | Iniciando experimento: mlp_base
+2026-08-27 01:45:47,614 | INFO | Run ID: mlp_base_k_epsilon_20260827_014547
+2026-08-27 01:45:47,614 | INFO | Hardware: {'platform': 'Linux-7.0.0-30-generic-x86_64-with-glibc2.35', 'processor': 'x86_64', 'python_version': '3.11.14', 'cpu_count_logical': 12, 'cpu_count_physical': 6, 'ram_total_gb': 31.23, 'torch_version': '2.9.1+cu128', 'cuda_available': True, 'cuda_version': '12.8', 'gpu_name': 'NVIDIA GeForce RTX 3060', 'gpu_count': 1, 'gpu_memory_gb': 11.63}
+2026-08-27 01:45:47,614 | INFO | Config: {'experiment': {'name': 'base', 'type': 'k_epsilon', 'seed': 42}, 'paths': {'root': '.', 'data_process_dir': 'data/data_processed', 'data_cfd_dir': 'data/data_cfd', 'results_dir': 'results', 'models_dir': 'results/models', 'metrics_dir': 'results/metrics', 'plots_dir': 'results/plots', 'logs_dir': 'logs'}, 'dataset': {'parquet': 'dataset_bfs_2d_kepsilon_Re36000_full.parquet', 'test_output': 'dataset_test_mlp'}, 'features': ['x', 'y', 'Ux', 'Uy', 'p', 'Re_norm'], 'targets': ['dUx', 'dUy', 'dp'], 'model': {'type': 'mlp', 'width': 64, 'depth': 4, 'activation': 'tanh'}, 'training': {'batch_size': 4096, 'epochs': 1000, 'lr': '1e-3', 'weight_decay': '1e-6'}, 'early_stopping': {'patience': 20}, 'scheduler': {'factor': 0.5, 'patience': 10}, 'split': {'strategy': 'spatial_x_quantile', 'column': 'x', 'bins': 8, 'test_frac': 0.2, 'version': 'v1'}}
+2026-08-27 01:45:47,614 | INFO | ================================================================================
+2026-08-27 01:45:47,764 | INFO | Dataset salvo: dataset_test_mlp_base_d4_w64.parquet
+2026-08-27 01:45:47,764 | INFO | Split salvo em: data/data_processed/splits/dataset_bfs_2d_kepsilon_Re36000_full_spatial_x_quantile_x/b8_v1_seed42.json
+2026-08-27 01:45:47,902 | INFO | Model device: cuda:0
+2026-08-27 01:45:49,499 | INFO | [MLP] ep=0001 loss_train=8.213613e-01 | loss_val=7.325009e-01 | lr=1.000000e-03 | best_val=7.325009e-01
+2026-08-27 01:45:52,014 | INFO | [MLP] ep=0010 loss_train=4.742740e-01 | loss_val=4.854643e-01 | lr=1.000000e-03 | best_val=4.854643e-01
+2026-08-27 01:45:54,812 | INFO | [MLP] ep=0020 loss_train=3.728411e-01 | loss_val=3.814045e-01 | lr=1.000000e-03 | best_val=3.814045e-01
+2026-08-27 01:45:57,731 | INFO | [MLP] ep=0030 loss_train=2.545251e-01 | loss_val=2.617985e-01 | lr=1.000000e-03 | best_val=2.617985e-01
+2026-08-27 01:46:00,632 | INFO | [MLP] ep=0040 loss_train=2.108696e-01 | loss_val=2.186261e-01 | lr=1.000000e-03 | best_val=2.186261e-01
+2026-08-27 01:46:03,634 | INFO | [MLP] ep=0050 loss_train=1.787803e-01 | loss_val=1.860698e-01 | lr=1.000000e-03 | best_val=1.860698e-01
+2026-08-27 01:46:06,682 | INFO | [MLP] ep=0060 loss_train=1.610249e-01 | loss_val=1.664359e-01 | lr=1.000000e-03 | best_val=1.664359e-01
+2026-08-27 01:46:09,861 | INFO | [MLP] ep=0070 loss_train=1.434263e-01 | loss_val=1.468282e-01 | lr=1.000000e-03 | best_val=1.468282e-01
+2026-08-27 01:46:13,201 | INFO | [MLP] ep=0080 loss_train=1.288012e-01 | loss_val=1.329509e-01 | lr=1.000000e-03 | best_val=1.329509e-01
+2026-08-27 01:46:16,656 | INFO | [MLP] ep=0090 loss_train=1.154582e-01 | loss_val=1.216327e-01 | lr=1.000000e-03 | best_val=1.216327e-01
+2026-08-27 01:46:19,770 | INFO | [MLP] ep=0100 loss_train=1.061728e-01 | loss_val=1.122580e-01 | lr=1.000000e-03 | best_val=1.122580e-01
+2026-08-27 01:46:23,070 | INFO | [MLP] ep=0110 loss_train=9.695939e-02 | loss_val=1.059762e-01 | lr=1.000000e-03 | best_val=1.028199e-01
+2026-08-27 01:46:26,561 | INFO | [MLP] ep=0120 loss_train=9.236601e-02 | loss_val=9.633665e-02 | lr=1.000000e-03 | best_val=9.555143e-02
+2026-08-27 01:46:29,825 | INFO | [MLP] ep=0130 loss_train=8.762728e-02 | loss_val=9.336348e-02 | lr=1.000000e-03 | best_val=8.837627e-02
+2026-08-27 01:46:33,205 | INFO | [MLP] ep=0140 loss_train=7.818318e-02 | loss_val=9.692273e-02 | lr=1.000000e-03 | best_val=8.130950e-02
+2026-08-27 01:46:36,683 | INFO | [MLP] ep=0150 loss_train=7.142482e-02 | loss_val=7.511483e-02 | lr=1.000000e-03 | best_val=7.511483e-02
+2026-08-27 01:46:39,895 | INFO | [MLP] ep=0160 loss_train=6.506567e-02 | loss_val=6.916063e-02 | lr=1.000000e-03 | best_val=6.916063e-02
+2026-08-27 01:46:43,375 | INFO | [MLP] ep=0170 loss_train=6.311299e-02 | loss_val=6.680130e-02 | lr=1.000000e-03 | best_val=6.660019e-02
+2026-08-27 01:46:46,704 | INFO | [MLP] ep=0180 loss_train=5.836080e-02 | loss_val=6.246234e-02 | lr=1.000000e-03 | best_val=6.186084e-02
+2026-08-27 01:46:50,070 | INFO | [MLP] ep=0190 loss_train=5.456552e-02 | loss_val=5.850705e-02 | lr=1.000000e-03 | best_val=5.816306e-02
+2026-08-27 01:46:53,266 | INFO | [MLP] ep=0200 loss_train=5.132588e-02 | loss_val=5.415183e-02 | lr=1.000000e-03 | best_val=5.415183e-02
+2026-08-27 01:46:56,919 | INFO | [MLP] ep=0210 loss_train=4.892107e-02 | loss_val=5.177119e-02 | lr=1.000000e-03 | best_val=5.177119e-02
+2026-08-27 01:47:00,514 | INFO | [MLP] ep=0220 loss_train=4.625198e-02 | loss_val=4.962387e-02 | lr=1.000000e-03 | best_val=4.902356e-02
+2026-08-27 01:47:04,339 | INFO | [MLP] ep=0230 loss_train=4.331756e-02 | loss_val=4.650685e-02 | lr=1.000000e-03 | best_val=4.650685e-02
+2026-08-27 01:47:07,687 | INFO | [MLP] ep=0240 loss_train=4.210515e-02 | loss_val=4.482241e-02 | lr=1.000000e-03 | best_val=4.461025e-02
+2026-08-27 01:47:11,164 | INFO | [MLP] ep=0250 loss_train=3.968185e-02 | loss_val=4.364200e-02 | lr=1.000000e-03 | best_val=4.250046e-02
+2026-08-27 01:47:14,337 | INFO | [MLP] ep=0260 loss_train=3.736533e-02 | loss_val=4.020109e-02 | lr=1.000000e-03 | best_val=4.020109e-02
+2026-08-27 01:47:17,609 | INFO | [MLP] ep=0270 loss_train=3.661441e-02 | loss_val=3.894012e-02 | lr=1.000000e-03 | best_val=3.871637e-02
+2026-08-27 01:47:20,921 | INFO | [MLP] ep=0280 loss_train=3.464925e-02 | loss_val=3.737007e-02 | lr=1.000000e-03 | best_val=3.737007e-02
+2026-08-27 01:47:24,183 | INFO | [MLP] ep=0290 loss_train=3.234111e-02 | loss_val=3.520066e-02 | lr=1.000000e-03 | best_val=3.486901e-02
+2026-08-27 01:47:27,659 | INFO | [MLP] ep=0300 loss_train=3.149966e-02 | loss_val=3.433719e-02 | lr=1.000000e-03 | best_val=3.372125e-02
+2026-08-27 01:47:31,367 | INFO | [MLP] ep=0310 loss_train=3.000436e-02 | loss_val=3.204680e-02 | lr=1.000000e-03 | best_val=3.204680e-02
+2026-08-27 01:47:34,690 | INFO | [MLP] ep=0320 loss_train=2.894880e-02 | loss_val=3.114753e-02 | lr=1.000000e-03 | best_val=3.114753e-02
+2026-08-27 01:47:38,274 | INFO | [MLP] ep=0330 loss_train=2.872657e-02 | loss_val=3.002001e-02 | lr=1.000000e-03 | best_val=3.002001e-02
+2026-08-27 01:47:41,495 | INFO | [MLP] ep=0340 loss_train=2.700129e-02 | loss_val=2.885171e-02 | lr=1.000000e-03 | best_val=2.885171e-02
+2026-08-27 01:47:44,776 | INFO | [MLP] ep=0350 loss_train=2.563802e-02 | loss_val=2.755922e-02 | lr=1.000000e-03 | best_val=2.755922e-02
+2026-08-27 01:47:48,331 | INFO | [MLP] ep=0360 loss_train=2.489989e-02 | loss_val=2.719386e-02 | lr=1.000000e-03 | best_val=2.670294e-02
+2026-08-27 01:47:51,922 | INFO | [MLP] ep=0370 loss_train=2.404250e-02 | loss_val=2.592705e-02 | lr=1.000000e-03 | best_val=2.592705e-02
+2026-08-27 01:47:55,129 | INFO | [MLP] ep=0380 loss_train=2.322178e-02 | loss_val=2.561915e-02 | lr=1.000000e-03 | best_val=2.486897e-02
+2026-08-27 01:47:58,414 | INFO | [MLP] ep=0390 loss_train=2.231052e-02 | loss_val=2.449320e-02 | lr=1.000000e-03 | best_val=2.442300e-02
+2026-08-27 01:48:01,987 | INFO | [MLP] ep=0400 loss_train=2.153764e-02 | loss_val=2.365499e-02 | lr=1.000000e-03 | best_val=2.313322e-02
+2026-08-27 01:48:05,390 | INFO | [MLP] ep=0410 loss_train=2.089922e-02 | loss_val=2.294835e-02 | lr=1.000000e-03 | best_val=2.294835e-02
+2026-08-27 01:48:09,063 | INFO | [MLP] ep=0420 loss_train=2.028844e-02 | loss_val=2.187327e-02 | lr=1.000000e-03 | best_val=2.187327e-02
+2026-08-27 01:48:12,552 | INFO | [MLP] ep=0430 loss_train=1.992628e-02 | loss_val=2.185508e-02 | lr=1.000000e-03 | best_val=2.140182e-02
+2026-08-27 01:48:15,849 | INFO | [MLP] ep=0440 loss_train=1.934442e-02 | loss_val=2.186869e-02 | lr=1.000000e-03 | best_val=2.079613e-02
+2026-08-27 01:48:19,244 | INFO | [MLP] ep=0450 loss_train=1.868809e-02 | loss_val=2.061554e-02 | lr=1.000000e-03 | best_val=2.047314e-02
+2026-08-27 01:48:22,529 | INFO | [MLP] ep=0460 loss_train=1.808426e-02 | loss_val=1.959527e-02 | lr=1.000000e-03 | best_val=1.947992e-02
+2026-08-27 01:48:25,756 | INFO | [MLP] ep=0470 loss_train=1.773174e-02 | loss_val=1.911608e-02 | lr=1.000000e-03 | best_val=1.911608e-02
+2026-08-27 01:48:28,877 | INFO | [MLP] ep=0480 loss_train=1.784952e-02 | loss_val=1.930869e-02 | lr=1.000000e-03 | best_val=1.881102e-02
+2026-08-27 01:48:31,921 | INFO | [MLP] ep=0490 loss_train=1.699777e-02 | loss_val=1.891414e-02 | lr=1.000000e-03 | best_val=1.867008e-02
+2026-08-27 01:48:35,329 | INFO | [MLP] ep=0500 loss_train=1.649559e-02 | loss_val=1.844387e-02 | lr=1.000000e-03 | best_val=1.838588e-02
+2026-08-27 01:48:39,128 | INFO | [MLP] ep=0510 loss_train=1.655705e-02 | loss_val=1.819924e-02 | lr=1.000000e-03 | best_val=1.804755e-02
+2026-08-27 01:48:42,389 | INFO | [MLP] ep=0520 loss_train=1.625521e-02 | loss_val=1.797669e-02 | lr=1.000000e-03 | best_val=1.746827e-02
+2026-08-27 01:48:45,900 | INFO | [MLP] ep=0530 loss_train=1.589168e-02 | loss_val=1.765759e-02 | lr=1.000000e-03 | best_val=1.742528e-02
+2026-08-27 01:48:49,520 | INFO | [MLP] ep=0540 loss_train=1.556901e-02 | loss_val=1.699158e-02 | lr=1.000000e-03 | best_val=1.699158e-02
+2026-08-27 01:48:52,843 | INFO | [MLP] ep=0550 loss_train=1.573465e-02 | loss_val=1.756094e-02 | lr=1.000000e-03 | best_val=1.699158e-02
+2026-08-27 01:48:56,203 | INFO | [MLP] ep=0560 loss_train=1.505594e-02 | loss_val=1.703219e-02 | lr=1.000000e-03 | best_val=1.689960e-02
+2026-08-27 01:48:59,609 | INFO | [MLP] ep=0570 loss_train=1.520498e-02 | loss_val=1.660174e-02 | lr=1.000000e-03 | best_val=1.660174e-02
+2026-08-27 01:49:03,084 | INFO | [MLP] ep=0580 loss_train=1.508877e-02 | loss_val=1.693121e-02 | lr=1.000000e-03 | best_val=1.637354e-02
+2026-08-27 01:49:06,560 | INFO | [MLP] ep=0590 loss_train=1.404285e-02 | loss_val=1.573292e-02 | lr=5.000000e-04 | best_val=1.562848e-02
+2026-08-27 01:49:09,761 | INFO | [MLP] ep=0600 loss_train=1.395818e-02 | loss_val=1.596484e-02 | lr=5.000000e-04 | best_val=1.553975e-02
+2026-08-27 01:49:12,790 | INFO | [MLP] ep=0610 loss_train=1.406657e-02 | loss_val=1.577718e-02 | lr=5.000000e-04 | best_val=1.551952e-02
+2026-08-27 01:49:16,221 | INFO | [MLP] ep=0620 loss_train=1.353866e-02 | loss_val=1.534959e-02 | lr=2.500000e-04 | best_val=1.534959e-02
+2026-08-27 01:49:19,455 | INFO | [MLP] ep=0630 loss_train=1.356888e-02 | loss_val=1.530804e-02 | lr=2.500000e-04 | best_val=1.524991e-02
+2026-08-27 01:49:22,441 | INFO | [MLP] ep=0640 loss_train=1.350499e-02 | loss_val=1.534667e-02 | lr=2.500000e-04 | best_val=1.519584e-02
+2026-08-27 01:49:25,854 | INFO | [MLP] ep=0650 loss_train=1.339681e-02 | loss_val=1.513909e-02 | lr=1.250000e-04 | best_val=1.513574e-02
+2026-08-27 01:49:29,044 | INFO | [MLP] ep=0660 loss_train=1.333836e-02 | loss_val=1.513343e-02 | lr=1.250000e-04 | best_val=1.507517e-02
+2026-08-27 01:49:32,433 | INFO | [MLP] ep=0670 loss_train=1.326826e-02 | loss_val=1.505814e-02 | lr=1.250000e-04 | best_val=1.505316e-02
+2026-08-27 01:49:35,810 | INFO | [MLP] ep=0680 loss_train=1.327314e-02 | loss_val=1.510784e-02 | lr=1.250000e-04 | best_val=1.503231e-02
+2026-08-27 01:49:39,121 | INFO | [MLP] ep=0690 loss_train=1.319257e-02 | loss_val=1.498786e-02 | lr=6.250000e-05 | best_val=1.497043e-02
+2026-08-27 01:49:42,594 | INFO | [MLP] ep=0700 loss_train=1.308928e-02 | loss_val=1.499552e-02 | lr=6.250000e-05 | best_val=1.495933e-02
+2026-08-27 01:49:46,040 | INFO | [MLP] ep=0710 loss_train=1.311442e-02 | loss_val=1.493341e-02 | lr=3.125000e-05 | best_val=1.492962e-02
+2026-08-27 01:49:49,605 | INFO | [MLP] ep=0720 loss_train=1.304218e-02 | loss_val=1.493218e-02 | lr=3.125000e-05 | best_val=1.491662e-02
+2026-08-27 01:49:53,188 | INFO | [MLP] ep=0730 loss_train=1.307938e-02 | loss_val=1.491903e-02 | lr=3.125000e-05 | best_val=1.490741e-02
+2026-08-27 01:49:56,434 | INFO | [MLP] ep=0740 loss_train=1.305769e-02 | loss_val=1.489579e-02 | lr=1.562500e-05 | best_val=1.489579e-02
+2026-08-27 01:49:59,923 | INFO | [MLP] ep=0750 loss_train=1.304051e-02 | loss_val=1.490038e-02 | lr=1.562500e-05 | best_val=1.489579e-02
+2026-08-27 01:50:03,109 | INFO | [MLP] ep=0760 loss_train=1.306177e-02 | loss_val=1.490063e-02 | lr=7.812500e-06 | best_val=1.489579e-02
+2026-08-27 01:50:03,109 | INFO | Early stopping (val não melhorou). Melhor loss_val: 1.489579e-02
+2026-08-27 01:50:03,191 | INFO | Scalers da MLP salvos em:results/models/mlp/mlp_base_20260827_014547
+2026-08-27 01:50:03,192 | INFO | Iniciando avaliacao final para base
+2026-08-27 01:50:03,192 | INFO | Modelo: results/models/mlp/mlp_base_20260827_014547/mlp_base_d4_w64.pt
+2026-08-27 01:50:03,192 | INFO | Dataset: data/data_processed/dataset_test_mlp_base_d4_w64.parquet
+2026-08-27 01:50:13,302 | INFO | Avaliacao concluida. Metrics: results/metrics/mlp/mlp_base_20260827_014547/mlp_base_d4_w64_seed42.json
+2026-08-27 01:50:13,302 | INFO | Predictions: results/metrics/mlp/mlp_base_20260827_014547/mlp_base_d4_w64_seed42_predictions.parquet
+2026-08-27 01:50:13,302 | INFO | Plots: results/plots/mlp/mlp_base_d4_w64_seed42_20260827_014547
+2026-08-27 01:50:13,302 | INFO | Iniciando avaliação física da MLP no domínio completo.
+2026-08-27 01:50:23,122 | INFO | ================================================================================
+2026-08-27 01:50:23,122 | INFO | Experimento finalizado
+2026-08-27 01:50:23,122 | INFO | Wall time: 275.51 s
+2026-08-27 01:50:23,122 | INFO | CPU time: 87.06 s
+2026-08-27 01:50:23,122 | INFO | Metadados salvos em: logs/mlp/mlp_base_20260827_014547/mlp_base_k_epsilon_20260827_014547.json
+2026-08-27 01:50:23,122 | INFO | ================================================================================
+
+========================================================
+      RESULTADOS DO MODELO (BASE)
+========================================================
+
+===== Métricas de Acurácia =====
+MAE vetorial (u,v) (coarse -> fine):      6.016801
+MAE pressão (p) (coarse -> fine):         285.395874
+MAE vetorial (u,v) (corrigido -> fine):   0.704012
+MAE pressão (p) (corrigido -> fine):      16.790321
+MAE vetorial (ΔU_pred -> ΔU_true):        0.704012
+MAE pressão (Δp_pred -> Δp_true):         16.790321
+RMSE (u,v) (coarse -> fine):              9.750356
+RMSE (u,v) (corrigido -> fine):           1.304377
+RMSE (p)   (coarse -> fine):              347.786835
+RMSE (p)   (corrigido -> fine):           26.304447
+RER (u,v):                                0.8830
+RER (p):                                  0.9412
+Melhora (u,v) (MAE):                      88.30%
+Melhora (p) (MAE):                        94.12%
+
+=====  Comparativo com CFD Fine (base) =====
+L2 relativo (u,v) - Coarse:               2.169262e-01
+L2 relativo (u,v) - Corrigido:            2.901981e-02
+L2 relativo (p) - Coarse:                 8.694501e-01
+L2 relativo (p) - Corrigido:              6.575983e-02
+Salvo: results/metrics/mlp/mlp_base_20260827_014547/mlp_base_d4_w64_seed42.json
+
+Predições salvas em: results/metrics/mlp/mlp_base_20260827_014547/mlp_base_d4_w64_seed42_predictions.parquet
+
+
+================================================================
+MÉTRICAS FÍSICAS DE DIVERGÊNCIA (base)
+================================================================
+
+CFD coarse
+  MAE(div U):                 1.551502e-01
+  RMSE(div U):                3.377179e+00
+  L2(div U):                  1.071098e+03
+  Linf(div U):                2.415380e+02
+  Média assinada(div U):      -5.707184e-02
+  Desvio-padrão(div U):       3.376696e+00
+  Pontos válidos:             100589 (100.00%)
+
+CFD fine
+  MAE(div U):                 4.239915e-01
+  RMSE(div U):                5.366322e+00
+  L2(div U):                  1.701970e+03
+  Linf(div U):                8.642390e+02
+  Média assinada(div U):      -3.276348e-02
+  Desvio-padrão(div U):       5.366222e+00
+  Pontos válidos:             100589 (100.00%)
+
+Campo corrigido
+  MAE(div U):                 1.222334e+02
+  RMSE(div U):                4.656627e+02
+  L2(div U):                  1.476885e+05
+  Linf(div U):                1.922139e+04
+  Média assinada(div U):      -5.433856e+00
+  Desvio-padrão(div U):       4.656310e+02
+  Pontos válidos:             100589 (100.00%)
+
+Corrigido versus CFD fine
+  MAE do erro de divergência: 1.222601e+02
+  RMSE do erro de divergência:4.657055e+02
+  L2 do erro de divergência:  1.477021e+05
+  Linf do erro de divergência:1.922138e+04
+
+Indicadores relativos
+  Redução RMSE vs. coarse:    -13688.51%
+  Redução MAE vs. coarse:     -78683.94%
+  Redução RMSE vs. fine:      -8577.50%
+================================================================

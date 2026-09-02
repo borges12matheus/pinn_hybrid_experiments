@@ -240,7 +240,10 @@ joblib.dump(xscaler, PATH_MODEL / "mlp_scaler_X.pkl")
 joblib.dump(yscaler, PATH_MODEL / "mlp_scaler_Y.pkl")
 logger.log_message(f"Scalers da MLP salvos em:{PATH_MODEL}")
 
-evaluation_result = run_metrics_pipeline(
+# ======================================================
+# AVALIAÇÃO DAS MÉTRICAS DE ACURÁCIA NO DOMÍNIO DE TESTE
+# ======================================================
+evaluation_test_result = run_metrics_pipeline(
     cfg=cfg,
     model_path=trainer.model_path,
     dataset_path=(
@@ -286,6 +289,50 @@ evaluation_result = run_metrics_pipeline(
     logger=logger,
 )
 
+# ======================================================
+# AVALIAÇÃO DAS MÉTRICAS DE ACURÁCIA NO DOMÍNIO COMPLETO
+# ======================================================
+evaluation_full_domain_result = run_metrics_pipeline(
+    cfg=cfg,
+    model_path=trainer.model_path,
+    dataset_path=(PATH_DATA / cfg["dataset"]["parquet"]),
+    xscaler_path=PATH_MODEL / "mlp_scaler_X.pkl",
+    yscaler_path=PATH_MODEL / "mlp_scaler_Y.pkl",
+    metrics_path=(
+        PATH_METRIC_EXP 
+        / (
+            f"mlp_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}_full_domain.json"
+        )
+    ),
+    predictions_path=(
+        PATH_METRIC_EXP 
+        / (
+            f"mlp_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}_predictions_full_domain.parquet"
+        )
+    ),
+    plots_dir=(
+        PATH_PLOT 
+        / (
+            f"mlp_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}"
+            f"_{timestamp}_full_domain"
+        )
+    ),
+    batch_size=cfg["training"]["batch_size"],
+    logger=logger,
+)
+
+# ======================================================
+# AVALIAÇÃO DAS MÉTRICAS FÍSICAS NO DOMÍNIO COMPLETO
+# ======================================================
 logger.log_message("Iniciando avaliação física da MLP no domínio completo.")
 
 physics_result = run_physics_metrics_pipeline(
@@ -331,7 +378,8 @@ logger.finish(
     final_metrics={
         "best_val": trainer.best_val,
         "model_path": str(trainer.model_path),
-        "evaluation_data": evaluation_result,
+        "evaluation_test": evaluation_test_result,
+        "evaluation_full_domain": evaluation_full_domain_result,
         "evaluation_physics": physics_result,
     }
 )
