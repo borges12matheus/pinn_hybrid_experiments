@@ -53,8 +53,9 @@ split:
   strategy: spatial_x_quantile
   column: x
   bins: 8
+  val_frac: 0.1
   test_frac: 0.2
-  version: v1
+  version: v2
 
 pinn:
   physics_mode: continuity

@@ -1,5 +1,5 @@
 {
-  "valid": false,
+  "valid": true,
   "checks": [
     {
       "field": "experiment.type",
@@ -16,29 +16,6 @@
       "pinn_path": "dataset.parquet",
       "mlp_value": "dataset_bfs_2d_kepsilon_Re36000_full.parquet",
       "pinn_value": "dataset_bfs_2d_kepsilon_Re36000_full.parquet"
-    },
-    {
-      "field": "features",
-      "status": "failure",
-      "mlp_path": "features",
-      "pinn_path": "features",
-      "mlp_value": [
-        "x",
-        "y",
-        "Ux",
-        "Uy",
-        "p",
-        "Re_norm"
-      ],
-      "pinn_value": [
-        "x",
-        "y",
-        "Ux",
-        "Uy",
-        "p",
-        "Re",
-        "nut_log"
-      ]
     },
     {
       "field": "targets",
@@ -173,8 +150,30 @@
       "status": "ok",
       "mlp_path": "split.version",
       "pinn_path": "split.version",
-      "mlp_value": "v1",
-      "pinn_value": "v1"
+      "mlp_value": "v2",
+      "pinn_value": "v2"
+    },
+    {
+      "field": "features",
+      "status": "ok",
+      "mlp_path": "features",
+      "pinn_path": "features",
+      "mlp_value": [
+        "x",
+        "y",
+        "Ux",
+        "Uy",
+        "p",
+        "Re_norm"
+      ],
+      "pinn_value": [
+        "x",
+        "y",
+        "Ux",
+        "Uy",
+        "p",
+        "Re_norm"
+      ]
     },
     {
       "field": "supervised_epochs",
@@ -193,12 +192,10 @@
       "pinn_value": "ce6b9b25461013481af116021cfe6f08f5f0dd85be76589d7a3d46be70ae422b"
     }
   ],
-  "failures": [
-    "Campo incompatível 'features': MLP=['x', 'y', 'Ux', 'Uy', 'p', 'Re_norm'] | PINN=['x', 'y', 'Ux', 'Uy', 'p', 'Re', 'nut_log']"
-  ],
+  "failures": [],
   "warnings": [],
   "pinn_physics": {
-    "pinn.physics_mode": "momentum",
+    "pinn.physics_mode": "continuity",
     "pinn.epochs_pre": 1000,
     "pinn.epochs_phys": 1000,
     "pinn.w_data": 1.0,

@@ -19,6 +19,7 @@ split_cfg = cfg.get("split", {})
 SPLIT_STRATEGY = split_cfg.get("strategy", "spatial_x_quantile")
 SPLIT_COLUMN = split_cfg.get("column", "x")
 SPLIT_BINS = int(split_cfg.get("bins", 8))
+SPLIT_VAL_FRAC = float(split_cfg.get("val_frac", 0.1))
 SPLIT_TEST_FRAC = float(split_cfg.get("test_frac", 0.2))
 SPLIT_VERSION = split_cfg.get("version", "v1")
 DATASET_TEST_OUTPUT = cfg["dataset"].get("test_output", "dataset_test_mlp")
@@ -30,7 +31,7 @@ PATH_CFD = ROOT / cfg["paths"]["data_cfd_dir"]
 PATH_MODEL = ROOT / cfg["paths"]["models_dir"] / "mlp" / f"mlp_{cfg['experiment']['name']}_{timestamp}"
 PATH_METRIC = ROOT / cfg["paths"]["metrics_dir"]
 PATH_METRIC_EXP = PATH_METRIC / "mlp" / f"mlp_{cfg['experiment']['name']}_{timestamp}"
-PATH_PLOT = ROOT / cfg["paths"]["plots_dir"] / "mlp"
+PATH_PLOT = ROOT / cfg["paths"]["plots_dir"] / "mlp" / f"mlp_{cfg['experiment']['name']}_{timestamp}"
 PATH_LOG = ROOT / cfg["paths"]["logs_dir"]
 PATH_LOG_EXP = PATH_LOG / "mlp" / f"mlp_{cfg['experiment']['name']}_{timestamp}"
 
@@ -84,14 +85,16 @@ def train_mlp_epoch(
         / f"{Path(parquet_path).stem}_{SPLIT_STRATEGY}_{SPLIT_COLUMN}"
         / f"b{SPLIT_BINS}_{SPLIT_VERSION}_seed{seed}.json"
     )
-    tr_idx, te_idx = load_or_create_split(df, seed, split_path, parquet_path, 
+    tr_idx, val_idx, te_idx = load_or_create_split(df, seed, split_path, parquet_path,
                                           SPLIT_STRATEGY, 
                                           SPLIT_COLUMN, 
                                           SPLIT_BINS, 
+                                          SPLIT_VAL_FRAC,
                                           SPLIT_TEST_FRAC,
                                           SPLIT_VERSION)
 
     df_tr = df.iloc[tr_idx].reset_index(drop=True)
+    df_val = df.iloc[val_idx].reset_index(drop=True)
     df_te = df.iloc[te_idx].reset_index(drop=True)
 
     # Dataset supervisionado (dados treino)
@@ -128,13 +131,14 @@ def train_mlp_epoch(
         "dataset_hash": DATASET_HASH,
         "split_path": str(split_path),
         "split_hash": hash_file(split_path),
-        "split_method": f"{SPLIT_STRATEGY}_{SPLIT_COLUMN}_v1",
+        "split_method": f"{SPLIT_STRATEGY}_{SPLIT_COLUMN}_{SPLIT_VERSION}",
         "split_bins": SPLIT_BINS,
+        "split_val_frac": SPLIT_VAL_FRAC,
         "split_test_frac": SPLIT_TEST_FRAC,
     })
 
-    test_ds = DataProcess(
-                    df_te, 
+    val_ds = DataProcess(
+                    df_val,
                     feat_cols, 
                     target_cols, 
                     x_scaler=(train_ds.x_mu, train_ds.x_sd), 
@@ -151,7 +155,7 @@ def train_mlp_epoch(
         val_loader_kwargs["persistent_workers"] = True
         val_loader_kwargs["prefetch_factor"] = 2
 
-    dl_val = DataLoader(test_ds, **val_loader_kwargs)
+    dl_val = DataLoader(val_ds, **val_loader_kwargs)
 
     in_dim = len(feat_cols)
     out_dim = len(target_cols)
@@ -263,7 +267,7 @@ evaluation_test_result = run_metrics_pipeline(
             f"mlp_{cfg['experiment']['name']}"
             f"_d{cfg['model']['depth']}"
             f"_w{cfg['model']['width']}"
-            f"_seed{cfg['experiment']['seed']}.json"
+            f"_seed{cfg['experiment']['seed']}_test.json"
         )
     ),
     predictions_path=(
@@ -272,7 +276,7 @@ evaluation_test_result = run_metrics_pipeline(
             f"mlp_{cfg['experiment']['name']}"
             f"_d{cfg['model']['depth']}"
             f"_w{cfg['model']['width']}"
-            f"_seed{cfg['experiment']['seed']}_predictions.parquet"
+            f"_seed{cfg['experiment']['seed']}_predictions_test.parquet"
         )
     ),
     plots_dir=(
@@ -282,7 +286,7 @@ evaluation_test_result = run_metrics_pipeline(
             f"_d{cfg['model']['depth']}"
             f"_w{cfg['model']['width']}"
             f"_seed{cfg['experiment']['seed']}"
-            f"_{timestamp}"
+            f"_test"
         )
     ),
     batch_size=cfg["training"]["batch_size"],
@@ -323,7 +327,7 @@ evaluation_full_domain_result = run_metrics_pipeline(
             f"_d{cfg['model']['depth']}"
             f"_w{cfg['model']['width']}"
             f"_seed{cfg['experiment']['seed']}"
-            f"_{timestamp}_full_domain"
+            f"_full_domain"
         )
     ),
     batch_size=cfg["training"]["batch_size"],
@@ -363,13 +367,14 @@ physics_result = run_physics_metrics_pipeline(
     ),
     batch_size=cfg["training"]["batch_size"],
     plots_dir= (
-        PATH_PLOT 
-        / (
+        PATH_PLOT
+        /
+        (
             f"mlp_{cfg['experiment']['name']}"
             f"_d{cfg['model']['depth']}"
             f"_w{cfg['model']['width']}"
             f"_seed{cfg['experiment']['seed']}"
-            f"_{timestamp}"
+            f"_physics"
         )
     )
 )

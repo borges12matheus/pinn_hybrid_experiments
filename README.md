@@ -92,7 +92,7 @@ Essa mesma validação roda automaticamente via GitHub Actions (`.github/workflo
 ## Observações
 - O treino já chama automaticamente o pós-processamento ao terminar.
 - O serviço `metrics` existe no `docker-compose.yml` para rodar a etapa final isoladamente.
-- O split atual é espacial estratificado em `x`, com `bins=8` e `test_frac=0.2`.
+- O split atual é espacial estratificado em `x`, com `bins=8`, `val_frac=0.1` e `test_frac=0.2`.
 
 ## Referências
 - D.M. Driver and H.L. Seegmiller. Features of a reattaching turbulent shear layer in divergent channel flow. AIAA Journal, 23(2):163–171, 1985.
