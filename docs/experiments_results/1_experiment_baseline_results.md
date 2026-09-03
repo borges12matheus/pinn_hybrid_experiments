@@ -51,7 +51,7 @@ Mantida exatamente igual para MLP e PINN:
 
 - mesma arquitetura
 - mesma seed
-- mesmo número de neurônios
+- mesmo número de neurônios (arquitetura)
 - mesmo split
 - mesmo pré-processamento
 
@@ -103,14 +103,12 @@ Resultados obtidos:
 
 | Métrica | MLP | PINN |
 |----------|------:|------:|
-| MAE (u,v) | 0.7040 | **0.6982** |
-| RMSE (u,v) | 1.3044 | **1.2855** |
+| MAE (u,v) | 0.7040 | **0.7915** |
+| RMSE (u,v) | 1.3044 | **1.4109** |
 | L2 Rel (u,v) | 0.02902 | **0.02860** |
-| MAE (p) | 16.790 | **16.236** |
-| RMSE (p) | 26.304 | **25.950** |
-| L2 Rel (p) | 0.06576 | **0.06487** |
-
-> **Nota de rastreabilidade (2026-08-26):** o run específico com `w_cont=1e-6` citado acima não está mais localizável nos artefatos atuais do repositório (nem em `logs/pinn/`, nem em `results/comparisons/experiments_publication.csv`, que só retém `w_cont` em {5e-5, 7.5e-5, 1e-4}). Prováveis causas: `src/cleanup_experiments.py` remove execuções por janela de tempo/quantidade, não por desempenho, então o run vencedor pode ter sido descartado por uma limpeza posterior. Os pontos de `w_cont` que seguem replicados (5e-5 a 1e-4, 3 seeds) mostram a PINN de continuidade **atrás** da MLP em acurácia supervisionada (ver `docs/experiments_results/2_experiment_physicis_cont.md`), embora com consistência física muito superior. Este resultado específico deve ser tratado como não reproduzido até que seja refeito e preservado.
+| MAE (p) | 16.7903 | **17.8458** |
+| RMSE (p) | 26.304 | **28.9733** |
+| L2 Rel (p) | 0.0658 | **0.0724** |
 
 ---
 

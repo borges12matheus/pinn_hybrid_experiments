@@ -39,7 +39,7 @@ model:
 
 training:
   batch_size: 4096
-  epochs: 1000
+  epochs: 2000
   lr: 1e-3
   weight_decay: 1e-6
 
@@ -54,14 +54,15 @@ split:
   strategy: spatial_x_quantile
   column: x
   bins: 8
+  val_frac: 0.1
   test_frac: 0.2
-  version: v1
+  version: v2
 
 pinn:
   physics_mode: cont_mom
   nut_transform: exp
-  epochs_pre: 1000
-  epochs_phys: 1000
+  epochs_pre: 2000
+  epochs_phys: 2000
   w_data: 1.0
   w_cont: 7.5e-5
-  w_mom: 5e-5
+  w_mom: 1e-6

@@ -21,6 +21,7 @@ pinn_cfg = cfg.get("pinn", {})
 SPLIT_STRATEGY = split_cfg.get("strategy", "spatial_x_quantile")
 SPLIT_COLUMN = split_cfg.get("column", "x")
 SPLIT_BINS = int(split_cfg.get("bins", 8))
+SPLIT_VAL_FRAC = float(split_cfg.get("val_frac", 0.1))
 SPLIT_TEST_FRAC = float(split_cfg.get("test_frac", 0.2))
 SPLIT_VERSION = split_cfg.get("version", "v1")
 DATASET_TEST_OUTPUT = cfg["dataset"].get("test_output", "dataset_test_pinn")
@@ -35,7 +36,7 @@ PATH_CFD = ROOT / cfg["paths"]["data_cfd_dir"]
 PATH_MODEL = ROOT / cfg["paths"]["models_dir"] / "pinn" / f"pinn_{cfg['experiment']['name']}_{timestamp}"
 PATH_METRIC = ROOT / cfg["paths"]["metrics_dir"]
 PATH_METRIC_EXP = PATH_METRIC / "pinn" / f"pinn_{cfg['experiment']['name']}_{timestamp}"
-PATH_PLOT = ROOT / cfg["paths"]["plots_dir"] / "pinn"
+PATH_PLOT = ROOT / cfg["paths"]["plots_dir"] / "pinn" / f"pinn_{cfg['experiment']['name']}_{timestamp}"
 PATH_LOG = ROOT / cfg["paths"]["logs_dir"]
 PATH_LOG_EXP = PATH_LOG / "pinn" / f"pinn_{cfg['experiment']['name']}_{timestamp}"
 
@@ -102,20 +103,23 @@ def train_pinn_epoch(
     df = pd.read_parquet(parquet_path)
     DATASET_HASH = hash_file(parquet_path)
 
+    # Fazendo o split do dataset em treino, validação e teste
     split_path = (
         PATH_DATA
         / "splits"
         / f"{Path(parquet_path).stem}_{SPLIT_STRATEGY}_{SPLIT_COLUMN}"
         / f"b{SPLIT_BINS}_{SPLIT_VERSION}_seed{seed}.json"
     )
-    tr_idx, te_idx = load_or_create_split(df, seed, split_path, parquet_path, 
+    tr_idx, val_idx, te_idx = load_or_create_split(df, seed, split_path, parquet_path,
                                           SPLIT_STRATEGY, 
                                           SPLIT_COLUMN, 
                                           SPLIT_BINS, 
+                                          SPLIT_VAL_FRAC,
                                           SPLIT_TEST_FRAC,
                                           SPLIT_VERSION)
 
     df_tr = df.iloc[tr_idx].reset_index(drop=True)
+    df_val = df.iloc[val_idx].reset_index(drop=True)
     df_te = df.iloc[te_idx].reset_index(drop=True)
 
     # Dataset supervisionado (dados treino)
@@ -154,10 +158,11 @@ def train_pinn_epoch(
         "split_hash": hash_file(split_path),
         "split_method": f"{SPLIT_STRATEGY}_{SPLIT_COLUMN}_{SPLIT_VERSION}",
         "split_bins": SPLIT_BINS,
+        "split_val_frac": SPLIT_VAL_FRAC,
         "split_test_frac": SPLIT_TEST_FRAC,
     })
 
-    test_ds = DataProcess(df_te, feat_cols, target_cols, 
+    val_ds = DataProcess(df_val, feat_cols, target_cols,
                          x_scaler=(train_ds.x_mu, train_ds.x_sd), 
                          y_scaler=(train_ds.y_mu, train_ds.y_sd),
                          physics_col="div_u")
@@ -172,7 +177,7 @@ def train_pinn_epoch(
         val_loader_kwargs["persistent_workers"] = True
         val_loader_kwargs["prefetch_factor"] = 2
 
-    dl_val = DataLoader(test_ds, **val_loader_kwargs)
+    dl_val = DataLoader(val_ds, **val_loader_kwargs)
 
     in_dim = len(feat_cols)
     out_dim = len(target_cols)
@@ -429,10 +434,10 @@ joblib.dump(yscaler, PATH_MODEL / "pinn_scaler_Y.pkl")
 logger.log_message(f"Scalers da PINN salvos em:{PATH_MODEL}")
 
 # ======================================================
-# AVALIAÇÃO DAS MÉTRICAS DE ACURÁCIA
+# AVALIAÇÃO DAS MÉTRICAS DE ACURÁCIA NO DOMÍNIO DE TESTE
 # ======================================================
 
-evaluation_result = run_metrics_pipeline(
+evaluation_test_result = run_metrics_pipeline(
     cfg=cfg,
     model_path=trainer.model_path,
     dataset_path=(
@@ -451,7 +456,7 @@ evaluation_result = run_metrics_pipeline(
         / (f"pinn_{cfg['experiment']['name']}"
            f"_d{cfg['model']['depth']}"
            f"_w{cfg['model']['width']}"
-           f"_seed{cfg['experiment']['seed']}.json"
+           f"_seed{cfg['experiment']['seed']}_test.json"
         )
     ),
     predictions_path=(
@@ -461,7 +466,7 @@ evaluation_result = run_metrics_pipeline(
             f"_d{cfg['model']['depth']}"
             f"_w{cfg['model']['width']}"
             f"_seed{cfg['experiment']['seed']}"
-            f"_predictions.parquet"
+            f"_predictions_test.parquet"
         )
     ),
     plots_dir=(
@@ -471,7 +476,50 @@ evaluation_result = run_metrics_pipeline(
             f"_d{cfg['model']['depth']}"
             f"_w{cfg['model']['width']}"
             f"_seed{cfg['experiment']['seed']}"
-            f"_{timestamp}"
+            f"_test"
+        )
+    ),
+    logs_dir=PATH_LOG_EXP,
+    batch_size=cfg["training"]["batch_size"],
+    logger=logger,
+)
+
+# ======================================================
+# AVALIAÇÃO DAS MÉTRICAS DE ACURÁCIA NO DOMÍNIO COMPLETO
+# ======================================================
+
+evaluation_full_domain_result = run_metrics_pipeline(
+    cfg=cfg,
+    model_path=trainer.model_path,
+    dataset_path=(PATH_DATA / cfg["dataset"]["parquet"]),
+    xscaler_path=PATH_MODEL / "pinn_scaler_X.pkl",
+    yscaler_path=PATH_MODEL / "pinn_scaler_Y.pkl",
+    metrics_path=(
+        PATH_METRIC_EXP 
+        / (f"pinn_{cfg['experiment']['name']}"
+           f"_d{cfg['model']['depth']}"
+           f"_w{cfg['model']['width']}"
+           f"_seed{cfg['experiment']['seed']}_full_domain.json"
+        )
+    ),
+    predictions_path=(
+        PATH_METRIC_EXP 
+        / (
+            f"pinn_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}"
+            f"_predictions_full_domain.parquet"
+        )
+    ),
+    plots_dir=(
+        PATH_PLOT 
+        / (
+            f"pinn_{cfg['experiment']['name']}"
+            f"_d{cfg['model']['depth']}"
+            f"_w{cfg['model']['width']}"
+            f"_seed{cfg['experiment']['seed']}"
+            f"_full_domain"
         )
     ),
     logs_dir=PATH_LOG_EXP,
@@ -519,7 +567,7 @@ physics_result = run_physics_metrics_pipeline(
             f"_d{cfg['model']['depth']}"
             f"_w{cfg['model']['width']}"
             f"_seed{cfg['experiment']['seed']}"
-            f"_{timestamp}"
+            f"_physics"
         )
     )
 )
@@ -537,7 +585,8 @@ logger.finish(
     final_metrics={
         "best_val": trainer.best_val,
         "model_path": str(trainer.model_path),
-        "evaluation_data": evaluation_result,
+        "evaluation_test": evaluation_test_result,
+        "evaluation_full_domain": evaluation_full_domain_result,
         "evaluation_physics": physics_result,
     }
 )

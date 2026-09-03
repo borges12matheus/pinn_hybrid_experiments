@@ -42,12 +42,12 @@ services:
     container_name: bfs_2d_run_train_pipe
     command: python src/run_baseline_pair.py
       --mlp-config configs/baseline/mlp_base.yaml
-      --pinn-config configs/baseline/pinn_cont_mom_base.yaml
+      --pinn-config configs/baseline/pinn_cont_base.yaml
       --mlp-command "python src/train_mlp.py --config {config}"
       --pinn-command "python src/train_pinn.py --config {config}"
       --mlp-predictions-glob "results/metrics/mlp/**/*_physics_predictions.parquet"
       --pinn-predictions-glob "results/metrics/pinn/**/*_physics_predictions.parquet"
-      --output-dir results/comparisons/mlp_vs_pinn_cont_mom_seed42
+      --output-dir results/comparisons/mlp_vs_pinn_cont_seed42
       #--validate-only
 
   clean_experiments:
