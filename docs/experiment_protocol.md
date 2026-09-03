@@ -80,6 +80,7 @@ Parâmetros principais:
 - `split.strategy`: estratégia de split
 - `split.column`: coluna usada no split espacial
 - `split.bins`: número de bins
+- `split.val_frac`: fração de validação por bin
 - `split.test_frac`: fração de teste por bin
 
 ## 5. Convenção de split
@@ -88,6 +89,7 @@ Foi adotada a convenção:
 - estratégia: `spatial_x_quantile`
 - coluna: `x`
 - bins: `8`
+- fração de validação: `0.1`
 - fração de teste: `0.2`
 
 Motivo:
@@ -105,8 +107,9 @@ Cada split grava:
 - `split_strategy`
 - `split_column`
 - `split_bins`
+- `val_frac`
 - `test_frac`
-- índices de treino e teste
+- índices de treino, validação e teste
 
 ## 6. Determinismo e rastreabilidade
 
@@ -182,8 +185,8 @@ Colunas esperadas incluem:
 Durante o treino:
 1. O dataset é carregado.
 2. O split espacial é criado ou reaproveitado.
-3. O treino usa `80%` dos dados em cada bin espacial.
-4. A validação usa `20%`.
+3. O treino usa `70%` dos dados em cada bin espacial.
+4. A validação usa `10%` e o teste usa `20%`.
 5. O melhor modelo é salvo por `early stopping`.
 6. Após o treino, o pós-processamento roda automaticamente.
 

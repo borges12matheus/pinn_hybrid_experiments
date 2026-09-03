@@ -38,7 +38,7 @@ model:
 
 training:
   batch_size: 4096
-  epochs: 1000
+  epochs: 2000
   lr: 1e-3
   weight_decay: 1e-6
 
@@ -53,5 +53,6 @@ split:
   strategy: spatial_x_quantile
   column: x
   bins: 8
+  val_frac: 0.1
   test_frac: 0.2
-  version: v1
+  version: v2
