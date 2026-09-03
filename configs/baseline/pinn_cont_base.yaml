@@ -60,8 +60,8 @@ split:
 pinn:
   physics_mode: continuity
   nut_transform: exp
-  epochs_pre: 1000
-  epochs_phys: 1000
+  epochs_pre: 2000
+  epochs_phys: 2000
   w_data: 1.0
   w_cont: 7.5e-5
   w_mom: 1e-5
