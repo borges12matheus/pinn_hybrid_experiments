@@ -39,7 +39,7 @@ model:
 
 training:
   batch_size: 4096
-  epochs: 1000
+  epochs: 2000
   lr: 1e-3
   weight_decay: 1e-6
 
