@@ -3,10 +3,12 @@ x-common: &common
     context: .
     dockerfile: Dockerfile
   working_dir: /app
+  user: "1000:1000"
   gpus: all
   shm_size: "8gb"
   ipc: host
   environment:
+    HOME: "/tmp"
     PYTHONHASHSEED: "42"
     CUBLAS_WORKSPACE_CONFIG: ":4096:8"
     OMP_NUM_THREADS: "1"

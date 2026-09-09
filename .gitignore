@@ -17,4 +17,5 @@ data/
 results/models/
 results/plots/
 results/metrics/
+results/comparisons/
 logs/

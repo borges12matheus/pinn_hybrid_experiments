@@ -1,9 +1,0 @@
-{
-  "timestamp": "20260908_152958",
-  "mlp_config": "/app/configs/baseline/mlp_base.yaml",
-  "pinn_config": "/app/configs/baseline/pinn_cont_base.yaml",
-  "mlp_predictions": "/app/results/metrics/mlp/mlp_base_20260908_153000/mlp_base_d4_w64_seed42_physics_predictions.parquet",
-  "pinn_predictions": "/app/results/metrics/pinn/pinn_cont_base_20260908_154133/pinn_cont_base_d4_w64_seed42_physics_predictions.parquet",
-  "fairness_report": "/app/results/comparisons/mlp_vs_pinn_cont_seed42_20260908_152958/fairness_report_20260908_152958.json",
-  "comparison_output_dir": "/app/results/comparisons/mlp_vs_pinn_cont_seed42_20260908_152958/plots"
-}
