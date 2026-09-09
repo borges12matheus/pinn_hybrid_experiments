@@ -13,9 +13,12 @@ pyproject.toml
 .python-version
 
 # Paths
+.agents/
+.codex/
+.pytest_cache/
 data/
 results/models/
 results/plots/
 results/metrics/
 results/comparisons/
-logs/
+logs/old

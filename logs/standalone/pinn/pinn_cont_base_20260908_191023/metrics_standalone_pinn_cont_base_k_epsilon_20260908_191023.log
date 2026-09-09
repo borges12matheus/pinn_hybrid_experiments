@@ -1,0 +1,9 @@
+2026-09-08 19:10:23,411 | INFO | Avaliacao independente (fora do pipeline de treino) para pinn_cont_base
+2026-09-08 19:10:23,412 | INFO | Iniciando avaliacao final para cont_base
+2026-09-08 19:10:23,412 | INFO | Modelo: results/models/pinn/pinn_cont_base_20260908_154133/pinn_cont_base_d4_w64.pt
+2026-09-08 19:10:23,412 | INFO | Dataset: data/data_processed/dataset_bfs_2d_kepsilon_Re20000_28000_36000_full.parquet
+2026-09-08 19:11:16,675 | INFO | Avaliacao concluida. Metrics: results/metrics/standalone/pinn/pinn_cont_base_20260908_191023/pinn_cont_base_d4_w64_seed42_eval.json
+2026-09-08 19:11:16,675 | INFO | Predictions: results/metrics/standalone/pinn/pinn_cont_base_20260908_191023/pinn_cont_base_d4_w64_seed42_predictions_eval.parquet
+2026-09-08 19:11:16,675 | INFO | Plots: results/plots/standalone/pinn/pinn_cont_base_20260908_191023/pinn_cont_base_d4_w64_seed42_eval
+2026-09-08 19:11:16,675 | INFO | Iniciando avaliação física no domínio completo.
+2026-09-08 19:11:42,547 | INFO | Avaliação física concluída. Metrics: results/metrics/standalone/pinn/pinn_cont_base_20260908_191023/pinn_cont_base_d4_w64_seed42_physics.json

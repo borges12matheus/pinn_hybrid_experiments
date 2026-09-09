@@ -1,0 +1,168 @@
+{
+    "run_id": "metrics_standalone_pinn_cont_mom_base_k_epsilon_20260909_132341",
+    "experiment_name": "metrics_standalone_pinn_cont_mom_base",
+    "experiment_type": "k_epsilon",
+    "start_time": "2026-09-09T13:23:41.214099",
+    "end_time": "2026-09-09T13:24:14.019793",
+    "wall_time_sec": 32.80569189400012,
+    "cpu_time_sec": 32.820132866,
+    "config": {
+        "experiment": {
+            "name": "cont_mom_base",
+            "type": "k_epsilon",
+            "seed": 42
+        },
+        "model": {
+            "type": "pinn",
+            "width": 64,
+            "depth": 4,
+            "activation": "tanh"
+        },
+        "paths": {
+            "root": ".",
+            "data_process_dir": "data/data_processed",
+            "results_dir": "results",
+            "metrics_dir": "results/metrics",
+            "plots_dir": "results/plots",
+            "logs_dir": "logs",
+            "models_dir": "results/models/pinn/pinn_cont_mom_base_20260909_123129"
+        },
+        "dataset": {
+            "parquet": "dataset_bfs_2d_kepsilon_Re32000_full.parquet"
+        },
+        "features": [
+            "x",
+            "y",
+            "Ux",
+            "Uy",
+            "p",
+            "Re",
+            "nut_log"
+        ],
+        "targets": [
+            "dUx",
+            "dUy",
+            "dp"
+        ],
+        "training": {
+            "batch_size": 4096
+        }
+    },
+    "hardware": {
+        "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.35",
+        "processor": "x86_64",
+        "python_version": "3.11.14",
+        "cpu_count_logical": 12,
+        "cpu_count_physical": 6,
+        "ram_total_gb": 31.23,
+        "torch_version": "2.9.1+cu128",
+        "cuda_available": true,
+        "cuda_version": "12.8",
+        "gpu_name": "NVIDIA GeForce RTX 3060",
+        "gpu_count": 1,
+        "gpu_memory_gb": 11.63
+    },
+    "training_history": [],
+    "final_metrics": {
+        "model_path": "results/models/pinn/pinn_cont_mom_base_20260909_123129/pinn_cont_mom_base_d4_w64.pt",
+        "evaluation": {
+            "metrics": {
+                "mae_uv_coarse_to_fine": 5.968082904815674,
+                "mae_uv_corrected_to_fine": 11.763425827026367,
+                "mae_uv_deltas_pred_vs_true": 11.763425827026367,
+                "mae_p_pressure_coarse_to_fine": 242.90008544921875,
+                "mae_p_corrected_to_fine": 210.19387817382812,
+                "mae_p_deltas_pred_vs_true": 210.19387817382812,
+                "rmse_uv_coarse_to_fine": 9.669479370117188,
+                "rmse_uv_corrected_to_fine": 16.80486488342285,
+                "rmse_p_coarse_to_fine": 358.8173522949219,
+                "rmse_p_corrected_to_fine": 256.9122619628906,
+                "l2_rel_uv_coarse": 0.2147115021944046,
+                "l2_rel_uv_corrected": 0.3731532692909241,
+                "l2_rel_p_coarse": 0.9996019005775452,
+                "l2_rel_p_corrected": 0.715712308883667,
+                "RER (u,v)": -0.9710560350179507,
+                "RER (p)": 0.13464880926206635,
+                "melhora_MAE_pct": -97.10560350179507,
+                "melhora_MAE_pct_pressure": 13.464880926206636,
+                "N": 100589
+            },
+            "metrics_path": "results/metrics/standalone/pinn/pinn_cont_mom_base_20260909_132341/pinn_cont_mom_base_d4_w64_seed42_eval.json",
+            "predictions_path": "results/metrics/standalone/pinn/pinn_cont_mom_base_20260909_132341/pinn_cont_mom_base_d4_w64_seed42_predictions_eval.parquet",
+            "plots_dir": "results/plots/standalone/pinn/pinn_cont_mom_base_20260909_132341/pinn_cont_mom_base_d4_w64_seed42_eval"
+        },
+        "evaluation_physics": {
+            "metrics": {
+                "divergence_source": {
+                    "coarse": "openfoam",
+                    "fine": "openfoam",
+                    "delta": "autograd",
+                    "corrected": "openfoam_coarse_plus_autograd_delta"
+                },
+                "divergence_coarse": {
+                    "mae": 0.10447743132374351,
+                    "rmse": 0.9438643527229529,
+                    "l2": 299.3538372976648,
+                    "linf": 60.0171,
+                    "mean_signed": -0.013854767158743307,
+                    "std": 0.9437626617789538,
+                    "n_valid": 100589,
+                    "valid_fraction": 1.0
+                },
+                "divergence_fine": {
+                    "mae": 0.3548913108568035,
+                    "rmse": 2.3186869474218756,
+                    "l2": 735.3893948853098,
+                    "linf": 319.536,
+                    "mean_signed": -0.0054594961735196495,
+                    "std": 2.3186805200471468,
+                    "n_valid": 100589,
+                    "valid_fraction": 1.0
+                },
+                "divergence_delta_pred": {
+                    "mae": 123.82983438831278,
+                    "rmse": 250.42340229033346,
+                    "l2": 79423.70766358673,
+                    "linf": 3358.02197265625,
+                    "mean_signed": -12.115367281946844,
+                    "std": 250.13016269592467,
+                    "n_valid": 100589,
+                    "valid_fraction": 1.0
+                },
+                "divergence_corrected": {
+                    "mae": 123.86386801947346,
+                    "rmse": 250.42765197397065,
+                    "l2": 79425.05548343,
+                    "linf": 3358.01927686625,
+                    "mean_signed": -12.129222049105586,
+                    "std": 250.13374591541958,
+                    "n_valid": 100589,
+                    "valid_fraction": 1.0
+                },
+                "divergence_error_corrected_vs_fine": {
+                    "mae": 123.88324879263303,
+                    "rmse": 250.4338679649617,
+                    "l2": 79427.02693277058,
+                    "linf": 3357.87339286625,
+                    "mean_signed": -12.12376255293206,
+                    "std": 250.14023387982192,
+                    "n_valid": 100589,
+                    "valid_fraction": 1.0
+                },
+                "RER_divergence_rmse_vs_coarse": -264.3216548029516,
+                "RER_divergence_mae_vs_coarse": -1184.5562148695763,
+                "RER_divergence_rmse_vs_fine": -107.00408060795728,
+                "improvement_divergence_rmse_pct": -26432.165480295163,
+                "improvement_divergence_mae_pct": -118455.62148695762,
+                "improvement_vs_fine_rmse_pct": -10700.408060795728
+            },
+            "metrics_path": "results/metrics/standalone/pinn/pinn_cont_mom_base_20260909_132341/pinn_cont_mom_base_d4_w64_seed42_physics.json",
+            "predictions_path": "results/metrics/standalone/pinn/pinn_cont_mom_base_20260909_132341/pinn_cont_mom_base_d4_w64_seed42_physics_predictions.parquet",
+            "plots": {
+                "divergence_absolute": "results/plots/standalone/pinn/pinn_cont_mom_base_20260909_132341/pinn_cont_mom_base_d4_w64_seed42_physics/pinn_cont_mom_base_divergence_absolute.png",
+                "divergence_signed": "results/plots/standalone/pinn/pinn_cont_mom_base_20260909_132341/pinn_cont_mom_base_d4_w64_seed42_physics/pinn_cont_mom_base_divergence_signed.png",
+                "divergence_error_vs_fine": "results/plots/standalone/pinn/pinn_cont_mom_base_20260909_132341/pinn_cont_mom_base_d4_w64_seed42_physics/cont_mom_base_divergence_error_vs_fine.png"
+            }
+        }
+    }
+}
