@@ -1,0 +1,39 @@
+experiment:
+  name: cont_mom_base
+  type: k_epsilon
+  seed: 42
+
+model:
+  type: pinn
+  width: 64
+  depth: 4
+  activation: tanh
+
+paths:
+  root: .
+  data_process_dir: data/data_processed
+  results_dir: results
+  metrics_dir: results/metrics
+  plots_dir: results/plots
+  logs_dir: logs
+  models_dir: results/models/pinn/pinn_cont_mom_base_20260909_123129
+
+dataset:
+  parquet: dataset_bfs_2d_kepsilon_Re32000_full.parquet
+
+features:
+  - x
+  - y
+  - Ux
+  - Uy
+  - p
+  - Re
+  - nut_log
+
+targets:
+  - dUx
+  - dUy
+  - dp
+
+training:
+  batch_size: 4096

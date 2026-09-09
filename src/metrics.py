@@ -47,6 +47,7 @@ def evaluate_metrics(
 
     df = pd.read_parquet(parquet_test_path)
 
+    # Definindo os campos de entrada (coarse) para avaliação
     Ux_c = df["Ux"].to_numpy(np.float32)
     Uy_c = df["Uy"].to_numpy(np.float32)
     p_c  = df["p"].to_numpy(np.float32)
@@ -55,15 +56,18 @@ def evaluate_metrics(
     dUy_true = df["dUy"].to_numpy(np.float32)
     dp_true  = df["dp"].to_numpy(np.float32)
 
+    # Definindo os campos de referência (fine) para comparação
     Ux_f = Ux_c + dUx_true
     Uy_f = Uy_c + dUy_true
     p_f  = p_c  + dp_true
 
+    # Normalizando os dados de entrada
     X = df[feat_cols].to_numpy(np.float32)
     x_mu, x_sd = xscaler
     y_mu, y_sd = yscaler
     Xn = (X - x_mu) / x_sd
 
+    # Realizando a predição em batches para evitar estouro de memória
     dUx_pred = np.zeros(len(df), dtype=np.float32)
     dUy_pred = np.zeros(len(df), dtype=np.float32)
     dp_pred = np.zeros(len(df), dtype=np.float32)
@@ -71,17 +75,18 @@ def evaluate_metrics(
     for i0 in range(0, len(df), batch_size):
         i1 = min(i0 + batch_size, len(df))
         xb = torch.tensor(Xn[i0:i1], dtype=torch.float32, device=device)
-        out_n = model(xb)[:, :3].detach().cpu().numpy()
-        out = out_n * y_sd + y_mu
+        out_n = model(xb)[:, :3].detach().cpu().numpy() # saída normalizada do modelo
+        out = out_n * y_sd + y_mu # Desnormalizando a saída do modelo
         dUx_pred[i0:i1] = out[:, 0]
         dUy_pred[i0:i1] = out[:, 1]
         dp_pred[i0:i1] = out[:, 2]
 
+    # Calculando os campos corrigidos (predições finais)
     Ux_hat = Ux_c + dUx_pred
     Uy_hat = Uy_c + dUy_pred
     p_hat = p_c + dp_pred
 
-    # Plotagem comparativa dos perfis de velocidade e pressão
+    # Montando o dataset para plotagem comparativa dos perfis de velocidade e pressão
     pred_df = df[["x", "y", "Ux", "Uy", "p", "dUx", "dUy", "dp"]].copy()
 
     pred_df["Ux_f"] = pred_df["Ux"] + pred_df["dUx"]
@@ -95,7 +100,9 @@ def evaluate_metrics(
     pred_df["Ux_corr"] = pred_df["Ux"] + pred_df["dUx_pred"]
     pred_df["Uy_corr"] = pred_df["Uy"] + pred_df["dUy_pred"]
     pred_df["p_corr"]  = pred_df["p"]  + pred_df["dp_pred"]
-    
+
+    # Calculando as métricas de avaliação
+    # -------------------------------------------------
     #MAE
     mae_coarse = mae_vec(Ux_c, Uy_c, Ux_f, Uy_f)
     mae_p_coarse = mae_vec_pressure(p_c, p_f)

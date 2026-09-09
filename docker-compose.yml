@@ -3,10 +3,12 @@ x-common: &common
     context: .
     dockerfile: Dockerfile
   working_dir: /app
+  user: "1000:1000"
   gpus: all
   shm_size: "8gb"
   ipc: host
   environment:
+    HOME: "/tmp"
     PYTHONHASHSEED: "42"
     CUBLAS_WORKSPACE_CONFIG: ":4096:8"
     OMP_NUM_THREADS: "1"
@@ -35,7 +37,7 @@ services:
   train_pinn:
     <<: *common
     container_name: bfs_2d_pinn_train
-    command: python src/train_pinn.py --config configs/baseline/pinn_mom_base.yaml
+    command: python src/train_pinn.py --config configs/baseline/pinn_cont_mom_base.yaml
 
   run_train_pipeline:
     <<: *common
@@ -49,6 +51,12 @@ services:
       --pinn-predictions-glob "results/metrics/pinn/**/*_physics_predictions.parquet"
       --output-dir results/comparisons/mlp_vs_pinn_cont_seed42
       #--validate-only
+
+  run_metrics_standalone:
+    <<: *common
+    container_name: bfs_2d_run_metrics_standalone
+    command: python src/run_metrics_pipe.py
+      --config configs/metrics/metrics_run.yaml
 
   clean_experiments:
     <<: *common
