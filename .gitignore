@@ -16,7 +16,7 @@ pyproject.toml
 .agents/
 .codex/
 .pytest_cache/
-data/data_cfd
+data/
 results/models/
 results/plots/
 results/metrics/
