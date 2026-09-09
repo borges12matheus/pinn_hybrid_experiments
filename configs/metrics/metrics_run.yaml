@@ -1,5 +1,5 @@
 experiment:
-  name: cont_base
+  name: cont_mom_base
   type: k_epsilon
   seed: 42
 
@@ -16,7 +16,7 @@ paths:
   metrics_dir: results/metrics
   plots_dir: results/plots
   logs_dir: logs
-  models_dir: results/models/pinn/pinn_cont_base_20260908_154133
+  models_dir: results/models/pinn/pinn_cont_mom_base_20260909_123129
 
 dataset:
   parquet: dataset_bfs_2d_kepsilon_Re32000_full.parquet
@@ -27,7 +27,8 @@ features:
   - Ux
   - Uy
   - p
-  - Re_norm
+  - Re
+  - nut_log
 
 targets:
   - dUx
