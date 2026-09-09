@@ -1,0 +1,107 @@
+2026-09-09 19:08:00,747 | INFO | Dispositivo do experimento: cuda
+2026-09-09 19:08:00,747 | INFO | ================================================================================
+2026-09-09 19:08:00,747 | INFO | Iniciando experimento: mlp_base
+2026-09-09 19:08:00,747 | INFO | Run ID: mlp_base_k_epsilon_20260909_190800
+2026-09-09 19:08:00,747 | INFO | Hardware: {'platform': 'Linux-7.0.0-31-generic-x86_64-with-glibc2.35', 'processor': 'x86_64', 'python_version': '3.11.14', 'cpu_count_logical': 12, 'cpu_count_physical': 6, 'ram_total_gb': 31.23, 'torch_version': '2.9.1+cu128', 'cuda_available': True, 'cuda_version': '12.8', 'gpu_name': 'NVIDIA GeForce RTX 3060', 'gpu_count': 1, 'gpu_memory_gb': 11.63}
+2026-09-09 19:08:00,747 | INFO | Config: {'experiment': {'name': 'base', 'type': 'k_epsilon', 'seed': 42}, 'paths': {'root': '.', 'data_process_dir': 'data/data_processed', 'data_cfd_dir': 'data/data_cfd', 'results_dir': 'results', 'models_dir': 'results/models', 'metrics_dir': 'results/metrics', 'plots_dir': 'results/plots', 'logs_dir': 'logs'}, 'dataset': {'parquet': 'dataset_bfs_2d_kepsilon_Re20000_28000_36000_full.parquet', 'test_output': 'dataset_test_mlp'}, 'features': ['x', 'y', 'Ux', 'Uy', 'p', 'Re_norm'], 'targets': ['dUx', 'dUy', 'dp'], 'model': {'type': 'mlp', 'width': 64, 'depth': 4, 'activation': 'tanh'}, 'training': {'batch_size': 4096, 'epochs': 2000, 'lr': '1e-3', 'weight_decay': '1e-6'}, 'early_stopping': {'patience': 20}, 'scheduler': {'factor': 0.5, 'patience': 10}, 'split': {'strategy': 'spatial_x_quantile', 'column': 'x', 'bins': 8, 'val_frac': 0.1, 'test_frac': 0.2, 'version': 'v2'}}
+2026-09-09 19:08:00,747 | INFO | ================================================================================
+2026-09-09 19:08:01,175 | INFO | Dataset salvo: dataset_test_mlp_base_d4_w64.parquet
+2026-09-09 19:08:01,175 | INFO | Split salvo em: data/data_processed/splits/dataset_bfs_2d_kepsilon_Re20000_28000_36000_full_spatial_x_quantile_x/b8_v2_seed42.json
+2026-09-09 19:08:01,300 | INFO | Model device: cuda:0
+2026-09-09 19:08:03,102 | INFO | [MLP] ep=0001 loss_train=7.500924e-01 | loss_val=6.799482e-01 | lr=1.000000e-03 | best_val=6.799482e-01
+2026-09-09 19:08:09,384 | INFO | [MLP] ep=0010 loss_train=3.902187e-01 | loss_val=3.927055e-01 | lr=1.000000e-03 | best_val=3.927055e-01
+2026-09-09 19:08:17,329 | INFO | [MLP] ep=0020 loss_train=2.627334e-01 | loss_val=2.618405e-01 | lr=1.000000e-03 | best_val=2.618405e-01
+2026-09-09 19:08:25,014 | INFO | [MLP] ep=0030 loss_train=1.748707e-01 | loss_val=1.758630e-01 | lr=1.000000e-03 | best_val=1.758630e-01
+2026-09-09 19:08:32,199 | INFO | [MLP] ep=0040 loss_train=1.349214e-01 | loss_val=1.384837e-01 | lr=1.000000e-03 | best_val=1.384837e-01
+2026-09-09 19:08:39,250 | INFO | [MLP] ep=0050 loss_train=1.124114e-01 | loss_val=1.142147e-01 | lr=1.000000e-03 | best_val=1.142147e-01
+2026-09-09 19:08:46,460 | INFO | [MLP] ep=0060 loss_train=9.892375e-02 | loss_val=9.767518e-02 | lr=1.000000e-03 | best_val=9.767518e-02
+2026-09-09 19:08:54,209 | INFO | [MLP] ep=0070 loss_train=8.768505e-02 | loss_val=8.809199e-02 | lr=1.000000e-03 | best_val=8.809199e-02
+2026-09-09 19:09:01,512 | INFO | [MLP] ep=0080 loss_train=7.915139e-02 | loss_val=8.095127e-02 | lr=1.000000e-03 | best_val=8.095127e-02
+2026-09-09 19:09:08,675 | INFO | [MLP] ep=0090 loss_train=7.258887e-02 | loss_val=7.389130e-02 | lr=1.000000e-03 | best_val=7.324805e-02
+2026-09-09 19:09:15,943 | INFO | [MLP] ep=0100 loss_train=6.599707e-02 | loss_val=6.941334e-02 | lr=1.000000e-03 | best_val=6.854524e-02
+2026-09-09 19:09:23,572 | INFO | [MLP] ep=0110 loss_train=6.144219e-02 | loss_val=6.247867e-02 | lr=1.000000e-03 | best_val=6.247867e-02
+2026-09-09 19:09:31,375 | INFO | [MLP] ep=0120 loss_train=5.718587e-02 | loss_val=5.915157e-02 | lr=1.000000e-03 | best_val=5.837224e-02
+2026-09-09 19:09:39,114 | INFO | [MLP] ep=0130 loss_train=5.354670e-02 | loss_val=5.476672e-02 | lr=1.000000e-03 | best_val=5.476672e-02
+2026-09-09 19:09:46,734 | INFO | [MLP] ep=0140 loss_train=5.085445e-02 | loss_val=5.274748e-02 | lr=1.000000e-03 | best_val=5.210645e-02
+2026-09-09 19:09:54,392 | INFO | [MLP] ep=0150 loss_train=4.839950e-02 | loss_val=5.030785e-02 | lr=1.000000e-03 | best_val=4.972980e-02
+2026-09-09 19:10:02,192 | INFO | [MLP] ep=0160 loss_train=4.523161e-02 | loss_val=4.748292e-02 | lr=1.000000e-03 | best_val=4.729298e-02
+2026-09-09 19:10:10,356 | INFO | [MLP] ep=0170 loss_train=4.369039e-02 | loss_val=4.518386e-02 | lr=1.000000e-03 | best_val=4.518386e-02
+2026-09-09 19:10:18,511 | INFO | [MLP] ep=0180 loss_train=4.160745e-02 | loss_val=4.330460e-02 | lr=1.000000e-03 | best_val=4.330460e-02
+2026-09-09 19:10:27,039 | INFO | [MLP] ep=0190 loss_train=4.041876e-02 | loss_val=4.189082e-02 | lr=1.000000e-03 | best_val=4.189082e-02
+2026-09-09 19:10:35,627 | INFO | [MLP] ep=0200 loss_train=3.853641e-02 | loss_val=3.951759e-02 | lr=1.000000e-03 | best_val=3.951759e-02
+2026-09-09 19:10:43,904 | INFO | [MLP] ep=0210 loss_train=3.697164e-02 | loss_val=3.824635e-02 | lr=1.000000e-03 | best_val=3.824635e-02
+2026-09-09 19:10:51,339 | INFO | [MLP] ep=0220 loss_train=3.635948e-02 | loss_val=3.788890e-02 | lr=1.000000e-03 | best_val=3.729853e-02
+2026-09-09 19:10:59,443 | INFO | [MLP] ep=0230 loss_train=3.491231e-02 | loss_val=3.617365e-02 | lr=1.000000e-03 | best_val=3.608849e-02
+2026-09-09 19:11:07,465 | INFO | [MLP] ep=0240 loss_train=3.354933e-02 | loss_val=3.630988e-02 | lr=1.000000e-03 | best_val=3.501684e-02
+2026-09-09 19:11:15,525 | INFO | [MLP] ep=0250 loss_train=3.240036e-02 | loss_val=3.389191e-02 | lr=1.000000e-03 | best_val=3.355216e-02
+2026-09-09 19:11:24,041 | INFO | [MLP] ep=0260 loss_train=3.178442e-02 | loss_val=3.318906e-02 | lr=1.000000e-03 | best_val=3.275518e-02
+2026-09-09 19:11:32,041 | INFO | [MLP] ep=0270 loss_train=3.099092e-02 | loss_val=3.154748e-02 | lr=1.000000e-03 | best_val=3.154748e-02
+2026-09-09 19:11:41,161 | INFO | [MLP] ep=0280 loss_train=2.947121e-02 | loss_val=3.078127e-02 | lr=1.000000e-03 | best_val=3.078127e-02
+2026-09-09 19:11:49,353 | INFO | [MLP] ep=0290 loss_train=2.865333e-02 | loss_val=3.022708e-02 | lr=1.000000e-03 | best_val=2.987755e-02
+2026-09-09 19:11:57,405 | INFO | [MLP] ep=0300 loss_train=2.762948e-02 | loss_val=2.878363e-02 | lr=1.000000e-03 | best_val=2.878363e-02
+2026-09-09 19:12:05,097 | INFO | [MLP] ep=0310 loss_train=2.741099e-02 | loss_val=2.917490e-02 | lr=1.000000e-03 | best_val=2.869934e-02
+2026-09-09 19:12:13,589 | INFO | [MLP] ep=0320 loss_train=2.665345e-02 | loss_val=2.903536e-02 | lr=1.000000e-03 | best_val=2.765736e-02
+2026-09-09 19:12:21,304 | INFO | [MLP] ep=0330 loss_train=2.584585e-02 | loss_val=2.747624e-02 | lr=1.000000e-03 | best_val=2.678158e-02
+2026-09-09 19:12:29,279 | INFO | [MLP] ep=0340 loss_train=2.505487e-02 | loss_val=2.588820e-02 | lr=1.000000e-03 | best_val=2.588820e-02
+2026-09-09 19:12:37,233 | INFO | [MLP] ep=0350 loss_train=2.411061e-02 | loss_val=2.573497e-02 | lr=1.000000e-03 | best_val=2.521126e-02
+2026-09-09 19:12:45,612 | INFO | [MLP] ep=0360 loss_train=2.348498e-02 | loss_val=2.564006e-02 | lr=1.000000e-03 | best_val=2.480767e-02
+2026-09-09 19:12:53,914 | INFO | [MLP] ep=0370 loss_train=2.301261e-02 | loss_val=2.404105e-02 | lr=1.000000e-03 | best_val=2.404105e-02
+2026-09-09 19:13:02,158 | INFO | [MLP] ep=0380 loss_train=2.262594e-02 | loss_val=2.366547e-02 | lr=1.000000e-03 | best_val=2.364197e-02
+2026-09-09 19:13:10,041 | INFO | [MLP] ep=0390 loss_train=2.243267e-02 | loss_val=2.326090e-02 | lr=1.000000e-03 | best_val=2.322389e-02
+2026-09-09 19:13:18,209 | INFO | [MLP] ep=0400 loss_train=2.175539e-02 | loss_val=2.274728e-02 | lr=1.000000e-03 | best_val=2.274728e-02
+2026-09-09 19:13:25,553 | INFO | [MLP] ep=0410 loss_train=2.101912e-02 | loss_val=2.299966e-02 | lr=1.000000e-03 | best_val=2.209364e-02
+2026-09-09 19:13:32,958 | INFO | [MLP] ep=0420 loss_train=2.070709e-02 | loss_val=2.172226e-02 | lr=1.000000e-03 | best_val=2.172226e-02
+2026-09-09 19:13:41,076 | INFO | [MLP] ep=0430 loss_train=2.071355e-02 | loss_val=2.185716e-02 | lr=1.000000e-03 | best_val=2.139374e-02
+2026-09-09 19:13:48,615 | INFO | [MLP] ep=0440 loss_train=1.965041e-02 | loss_val=2.100320e-02 | lr=1.000000e-03 | best_val=2.089369e-02
+2026-09-09 19:13:56,340 | INFO | [MLP] ep=0450 loss_train=1.919167e-02 | loss_val=2.072512e-02 | lr=1.000000e-03 | best_val=2.072512e-02
+2026-09-09 19:14:04,056 | INFO | [MLP] ep=0460 loss_train=1.944787e-02 | loss_val=2.158376e-02 | lr=1.000000e-03 | best_val=2.032966e-02
+2026-09-09 19:14:11,717 | INFO | [MLP] ep=0470 loss_train=1.897329e-02 | loss_val=2.081705e-02 | lr=1.000000e-03 | best_val=1.993562e-02
+2026-09-09 19:14:19,258 | INFO | [MLP] ep=0480 loss_train=1.842725e-02 | loss_val=2.002109e-02 | lr=1.000000e-03 | best_val=1.991893e-02
+2026-09-09 19:14:27,113 | INFO | [MLP] ep=0490 loss_train=1.824345e-02 | loss_val=1.964271e-02 | lr=1.000000e-03 | best_val=1.918405e-02
+2026-09-09 19:14:34,443 | INFO | [MLP] ep=0500 loss_train=1.689988e-02 | loss_val=1.891574e-02 | lr=5.000000e-04 | best_val=1.825863e-02
+2026-09-09 19:14:42,007 | INFO | [MLP] ep=0510 loss_train=1.690452e-02 | loss_val=1.837714e-02 | lr=2.500000e-04 | best_val=1.825863e-02
+2026-09-09 19:14:49,640 | INFO | [MLP] ep=0520 loss_train=1.640223e-02 | loss_val=1.808681e-02 | lr=2.500000e-04 | best_val=1.784911e-02
+2026-09-09 19:14:56,925 | INFO | [MLP] ep=0530 loss_train=1.633892e-02 | loss_val=1.786017e-02 | lr=2.500000e-04 | best_val=1.776228e-02
+2026-09-09 19:15:04,700 | INFO | [MLP] ep=0540 loss_train=1.608241e-02 | loss_val=1.773983e-02 | lr=1.250000e-04 | best_val=1.757877e-02
+2026-09-09 19:15:12,205 | INFO | [MLP] ep=0550 loss_train=1.602055e-02 | loss_val=1.760130e-02 | lr=1.250000e-04 | best_val=1.751789e-02
+2026-09-09 19:15:19,916 | INFO | [MLP] ep=0560 loss_train=1.584238e-02 | loss_val=1.749654e-02 | lr=6.250000e-05 | best_val=1.743302e-02
+2026-09-09 19:15:27,212 | INFO | [MLP] ep=0570 loss_train=1.586839e-02 | loss_val=1.737380e-02 | lr=6.250000e-05 | best_val=1.737380e-02
+2026-09-09 19:15:35,227 | INFO | [MLP] ep=0580 loss_train=1.576964e-02 | loss_val=1.737120e-02 | lr=6.250000e-05 | best_val=1.734995e-02
+2026-09-09 19:15:43,181 | INFO | [MLP] ep=0590 loss_train=1.574628e-02 | loss_val=1.731430e-02 | lr=6.250000e-05 | best_val=1.729255e-02
+2026-09-09 19:15:51,130 | INFO | [MLP] ep=0600 loss_train=1.567615e-02 | loss_val=1.730803e-02 | lr=3.125000e-05 | best_val=1.727511e-02
+2026-09-09 19:15:59,460 | INFO | [MLP] ep=0610 loss_train=1.567762e-02 | loss_val=1.726616e-02 | lr=3.125000e-05 | best_val=1.724927e-02
+2026-09-09 19:16:07,850 | INFO | [MLP] ep=0620 loss_train=1.563761e-02 | loss_val=1.725789e-02 | lr=3.125000e-05 | best_val=1.721618e-02
+2026-09-09 19:16:16,065 | INFO | [MLP] ep=0630 loss_train=1.561035e-02 | loss_val=1.722208e-02 | lr=3.125000e-05 | best_val=1.718920e-02
+2026-09-09 19:16:24,973 | INFO | [MLP] ep=0640 loss_train=1.560511e-02 | loss_val=1.720921e-02 | lr=3.125000e-05 | best_val=1.717046e-02
+2026-09-09 19:16:33,671 | INFO | [MLP] ep=0650 loss_train=1.555256e-02 | loss_val=1.716483e-02 | lr=3.125000e-05 | best_val=1.715171e-02
+2026-09-09 19:16:41,284 | INFO | [MLP] ep=0660 loss_train=1.551902e-02 | loss_val=1.714070e-02 | lr=1.562500e-05 | best_val=1.714070e-02
+2026-09-09 19:16:48,670 | INFO | [MLP] ep=0670 loss_train=1.549900e-02 | loss_val=1.714410e-02 | lr=1.562500e-05 | best_val=1.712512e-02
+2026-09-09 19:16:56,762 | INFO | [MLP] ep=0680 loss_train=1.549735e-02 | loss_val=1.716912e-02 | lr=1.562500e-05 | best_val=1.710551e-02
+2026-09-09 19:17:04,404 | INFO | [MLP] ep=0690 loss_train=1.543949e-02 | loss_val=1.713215e-02 | lr=7.812500e-06 | best_val=1.710551e-02
+2026-09-09 19:17:12,249 | INFO | [MLP] ep=0700 loss_train=1.544900e-02 | loss_val=1.710812e-02 | lr=3.906250e-06 | best_val=1.710211e-02
+2026-09-09 19:17:20,343 | INFO | [MLP] ep=0710 loss_train=1.543865e-02 | loss_val=1.710154e-02 | lr=3.906250e-06 | best_val=1.709813e-02
+2026-09-09 19:17:27,947 | INFO | [MLP] ep=0720 loss_train=1.545840e-02 | loss_val=1.709740e-02 | lr=1.953125e-06 | best_val=1.709740e-02
+2026-09-09 19:17:35,851 | INFO | [MLP] ep=0730 loss_train=1.545444e-02 | loss_val=1.709629e-02 | lr=9.765625e-07 | best_val=1.709629e-02
+2026-09-09 19:17:43,340 | INFO | [MLP] ep=0740 loss_train=1.544381e-02 | loss_val=1.709761e-02 | lr=9.765625e-07 | best_val=1.709592e-02
+2026-09-09 19:17:50,861 | INFO | [MLP] ep=0750 loss_train=1.542940e-02 | loss_val=1.709847e-02 | lr=4.882813e-07 | best_val=1.709592e-02
+2026-09-09 19:17:55,429 | INFO | Early stopping (val não melhorou). Melhor loss_val: 1.709592e-02
+2026-09-09 19:17:55,507 | INFO | Scalers da MLP salvos em:results/models/mlp/mlp_base_20260909_190800
+2026-09-09 19:17:55,507 | INFO | Iniciando avaliacao final para base
+2026-09-09 19:17:55,508 | INFO | Modelo: results/models/mlp/mlp_base_20260909_190800/mlp_base_d4_w64.pt
+2026-09-09 19:17:55,508 | INFO | Dataset: data/data_processed/dataset_test_mlp_base_d4_w64.parquet
+2026-09-09 19:18:12,867 | INFO | Avaliacao concluida. Metrics: results/metrics/mlp/mlp_base_20260909_190800/mlp_base_d4_w64_seed42_test.json
+2026-09-09 19:18:12,867 | INFO | Predictions: results/metrics/mlp/mlp_base_20260909_190800/mlp_base_d4_w64_seed42_predictions_test.parquet
+2026-09-09 19:18:12,867 | INFO | Plots: results/plots/mlp/mlp_base_20260909_190800/mlp_base_d4_w64_seed42_test
+2026-09-09 19:18:12,867 | INFO | Iniciando avaliacao final para base
+2026-09-09 19:18:12,867 | INFO | Modelo: results/models/mlp/mlp_base_20260909_190800/mlp_base_d4_w64.pt
+2026-09-09 19:18:12,867 | INFO | Dataset: data/data_processed/dataset_bfs_2d_kepsilon_Re20000_28000_36000_full.parquet
+2026-09-09 19:19:05,348 | INFO | Avaliacao concluida. Metrics: results/metrics/mlp/mlp_base_20260909_190800/mlp_base_d4_w64_seed42_full_domain.json
+2026-09-09 19:19:05,348 | INFO | Predictions: results/metrics/mlp/mlp_base_20260909_190800/mlp_base_d4_w64_seed42_predictions_full_domain.parquet
+2026-09-09 19:19:05,348 | INFO | Plots: results/plots/mlp/mlp_base_20260909_190800/mlp_base_d4_w64_seed42_full_domain
+2026-09-09 19:19:05,348 | INFO | Iniciando avaliação física da MLP no domínio completo.
+2026-09-09 19:19:29,919 | INFO | ================================================================================
+2026-09-09 19:19:29,919 | INFO | Experimento finalizado
+2026-09-09 19:19:29,919 | INFO | Wall time: 689.17 s
+2026-09-09 19:19:29,919 | INFO | CPU time: 274.05 s
+2026-09-09 19:19:29,919 | INFO | Metadados salvos em: logs/mlp/mlp_base_20260909_190800/mlp_base_k_epsilon_20260909_190800.json
+2026-09-09 19:19:29,919 | INFO | ================================================================================
