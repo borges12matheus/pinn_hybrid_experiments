@@ -158,7 +158,7 @@ def run_metrics_pipeline(
         "plots_dir": str(plots_dir),
     }
 
-
+# Função principal para rodar standalone
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
