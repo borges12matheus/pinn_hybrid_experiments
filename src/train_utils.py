@@ -38,8 +38,13 @@ class DataProcess(Dataset):
 
         if self.has_y:
             if y_scaler is None:
-                y_mu = self.Y.mean(axis=0, keepdims=True)
-                y_sd = self.Y.std(axis=0, keepdims=True) + 1e-8
+                # scaler robusto (mediana/IQR) para os targets: dUx/dUy/dp têm
+                # cauda pesada (outliers de canto/parede) que inflam mean/std e
+                # espremem o sinal do miolo dos dados perto de zero.
+                y_mu = np.median(self.Y, axis=0, keepdims=True)
+                q75 = np.percentile(self.Y, 75, axis=0, keepdims=True)
+                q25 = np.percentile(self.Y, 25, axis=0, keepdims=True)
+                y_sd = (q75 - q25) + 1e-8
                 self.y_mu = y_mu
                 self.y_sd = y_sd
             else:
