@@ -50,6 +50,12 @@ services:
       --output-dir results/comparisons/mlp_vs_pinn_cont_seed42
       #--validate-only
 
+  run_metrics_standalone:
+    <<: *common
+    container_name: bfs_2d_run_metrics_standalone
+    command: python src/run_metrics_pipe.py
+      --config configs/metrics/metrics_run.yaml
+
   clean_experiments:
     <<: *common
     container_name: bfs_2d_cleanup
