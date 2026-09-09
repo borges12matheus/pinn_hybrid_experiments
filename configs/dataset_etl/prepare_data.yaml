@@ -15,13 +15,13 @@ paths:
 
 cfd_data:
   input_format: auto       # auto, raw ou csv
-  path_coarse: cfd_rans_k_epsilon/Re_28000/coarse
-  path_fine: cfd_rans_k_epsilon/Re_28000/fine
+  path_coarse: cfd_rans_k_epsilon/Re_32000/coarse
+  path_fine: cfd_rans_k_epsilon/Re_32000/fine
   dataset: grid_pinn_div(U)_epsilon_k_nut_p_U.xy
   dataset_csv: grid_pinn_div(U)_epsilon_k_nut_p_U.csv
   csv_separator: ","
-  Re: 28000
-  out_name: dataset_bfs_2d_kepsilon_Re28000_full.parquet
+  Re: 32000
+  out_name: dataset_bfs_2d_kepsilon_Re32000_full.parquet
 
 features:
   - x

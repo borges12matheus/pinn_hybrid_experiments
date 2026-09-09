@@ -1,0 +1,48 @@
+{
+  "mlp_predictions": "/app/results/metrics/mlp/mlp_base_20260908_153000/mlp_base_d4_w64_seed42_physics_predictions.parquet",
+  "pinn_predictions": "/app/results/metrics/pinn/pinn_cont_base_20260908_154133/pinn_cont_base_d4_w64_seed42_physics_predictions.parquet",
+  "n_points": 301767,
+  "h": 0.0127,
+  "percentile": 99.0,
+  "scales": {
+    "absolute_common": {
+      "vmin": 0.0012642244000000001,
+      "vmax": 765.692770019202
+    },
+    "signed_common": {
+      "vmin": 0.0012642244000000001,
+      "vmax": 765.692770019202
+    },
+    "error_common_abs_vmax": 1073.2117025674781,
+    "vmax_mlp": 1743.5124223357197,
+    "vmax_pinn": 22.12554208092729
+  },
+  "summary": {
+    "mlp": {
+      "mae_abs_div": 134.195666582449,
+      "rmse_div": 460.99386201747785,
+      "linf_div": 23554.329697245,
+      "mean_signed_div": 1.448892789477776,
+      "std_div": 460.99158509399496,
+      "mae_error_vs_fine": 134.22058126993122,
+      "rmse_error_vs_fine": 461.02532609066077,
+      "linf_error_vs_fine": 23554.317177845
+    },
+    "pinn": {
+      "mae_abs_div": 3.274739478647569,
+      "rmse_div": 5.68432649810184,
+      "linf_div": 344.8541022265625,
+      "mean_signed_div": 0.1438599624140499,
+      "std_div": 5.682505789547158,
+      "mae_error_vs_fine": 3.3940365264912282,
+      "rmse_error_vs_fine": 6.7713393921142355,
+      "linf_error_vs_fine": 874.3414392367188
+    }
+  },
+  "plots": {
+    "absolute_common": "/app/results/comparisons/mlp_vs_pinn_cont_seed42_20260908_152958/plots/divergence_mlp_vs_pinn_absolute_common_scale.png",
+    "signed_common": "/app/results/comparisons/mlp_vs_pinn_cont_seed42_20260908_152958/plots/divergence_mlp_vs_pinn_signed_common_scale.png",
+    "error_common": "/app/results/comparisons/mlp_vs_pinn_cont_seed42_20260908_152958/plots/divergence_error_mlp_vs_pinn_common_scale.png",
+    "local_scales": "/app/results/comparisons/mlp_vs_pinn_cont_seed42_20260908_152958/plots/divergence_mlp_vs_pinn_local_scales.png"
+  }
+}
