@@ -1,0 +1,10 @@
+2026-09-09 13:19:20,975 | INFO | ================================================================================
+2026-09-09 13:19:20,975 | INFO | Iniciando experimento: metrics_standalone_pinn_cont_mom_base
+2026-09-09 13:19:20,976 | INFO | Run ID: metrics_standalone_pinn_cont_mom_base_k_epsilon_20260909_131920
+2026-09-09 13:19:20,976 | INFO | Hardware: {'platform': 'Linux-7.0.0-31-generic-x86_64-with-glibc2.35', 'processor': 'x86_64', 'python_version': '3.11.14', 'cpu_count_logical': 12, 'cpu_count_physical': 6, 'ram_total_gb': 31.23, 'torch_version': '2.9.1+cu128', 'cuda_available': True, 'cuda_version': '12.8', 'gpu_name': 'NVIDIA GeForce RTX 3060', 'gpu_count': 1, 'gpu_memory_gb': 11.63}
+2026-09-09 13:19:20,976 | INFO | Config: {'experiment': {'name': 'cont_mom_base', 'type': 'k_epsilon', 'seed': 42}, 'model': {'type': 'pinn', 'width': 64, 'depth': 4, 'activation': 'tanh'}, 'paths': {'root': '.', 'data_process_dir': 'data/data_processed', 'results_dir': 'results', 'metrics_dir': 'results/metrics', 'plots_dir': 'results/plots', 'logs_dir': 'logs', 'models_dir': 'results/models/pinn/pinn_mom_base_20260909_120129'}, 'dataset': {'parquet': 'dataset_bfs_2d_kepsilon_Re32000_full.parquet'}, 'features': ['x', 'y', 'Ux', 'Uy', 'p', 'Re', 'nut_log'], 'targets': ['dUx', 'dUy', 'dp'], 'training': {'batch_size': 4096}}
+2026-09-09 13:19:20,976 | INFO | ================================================================================
+2026-09-09 13:19:20,976 | INFO | Avaliacao independente (fora do pipeline de treino) para pinn_cont_mom_base
+2026-09-09 13:19:20,976 | INFO | Iniciando avaliacao final para cont_mom_base
+2026-09-09 13:19:20,976 | INFO | Modelo: results/models/pinn/pinn_mom_base_20260909_120129/pinn_cont_mom_base_d4_w64.pt
+2026-09-09 13:19:20,976 | INFO | Dataset: data/data_processed/dataset_bfs_2d_kepsilon_Re32000_full.parquet

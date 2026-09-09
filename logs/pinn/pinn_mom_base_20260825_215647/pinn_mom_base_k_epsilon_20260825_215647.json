@@ -1,0 +1,1456 @@
+{
+    "run_id": "pinn_mom_base_k_epsilon_20260825_215647",
+    "experiment_name": "pinn_mom_base",
+    "experiment_type": "k_epsilon",
+    "start_time": "2026-08-25T21:56:48.089658",
+    "end_time": "2026-08-25T22:08:52.969774",
+    "wall_time_sec": 724.8801142110024,
+    "cpu_time_sec": 423.908501213,
+    "config": {
+        "experiment": {
+            "name": "mom_base",
+            "type": "k_epsilon",
+            "seed": 42
+        },
+        "paths": {
+            "root": ".",
+            "data_process_dir": "data/data_processed",
+            "data_cfd_dir": "data/data_cfd",
+            "results_dir": "results",
+            "models_dir": "results/models",
+            "metrics_dir": "results/metrics",
+            "plots_dir": "results/plots",
+            "logs_dir": "logs"
+        },
+        "dataset": {
+            "parquet": "dataset_bfs_2d_kepsilon_Re36000_full.parquet",
+            "test_output": "dataset_test_pinn"
+        },
+        "features": [
+            "x",
+            "y",
+            "Ux",
+            "Uy",
+            "p",
+            "Re",
+            "nut_log"
+        ],
+        "targets": [
+            "dUx",
+            "dUy",
+            "dp"
+        ],
+        "model": {
+            "type": "pinn",
+            "width": 64,
+            "depth": 4,
+            "activation": "tanh"
+        },
+        "training": {
+            "batch_size": 4096,
+            "epochs": 1000,
+            "lr": "1e-3",
+            "weight_decay": "1e-6"
+        },
+        "early_stopping": {
+            "patience": 20
+        },
+        "scheduler": {
+            "factor": 0.5,
+            "patience": 10
+        },
+        "split": {
+            "strategy": "spatial_x_quantile",
+            "column": "x",
+            "bins": 8,
+            "test_frac": 0.2,
+            "version": "v1"
+        },
+        "pinn": {
+            "physics_mode": "momentum",
+            "nut_transform": "exp",
+            "epochs_pre": 1000,
+            "epochs_phys": 1000,
+            "w_data": 1.0,
+            "w_cont": 7.5e-05,
+            "w_mom": "1e-5"
+        }
+    },
+    "hardware": {
+        "platform": "Linux-7.0.0-30-generic-x86_64-with-glibc2.35",
+        "processor": "x86_64",
+        "python_version": "3.11.14",
+        "cpu_count_logical": 12,
+        "cpu_count_physical": 6,
+        "ram_total_gb": 31.23,
+        "torch_version": "2.9.1+cu128",
+        "cuda_available": true,
+        "cuda_version": "12.8",
+        "gpu_name": "NVIDIA GeForce RTX 3060",
+        "gpu_count": 1,
+        "gpu_memory_gb": 11.63
+    },
+    "training_history": [
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 1,
+            "loss_train": 0.7770475180525529,
+            "loss_val": 0.7188444714480312,
+            "lr": 0.001,
+            "best_val": 0.7188444714480312
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 10,
+            "loss_train": 0.45502591289972005,
+            "loss_val": 0.4702290596622088,
+            "lr": 0.001,
+            "best_val": 0.4702290596622088
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 20,
+            "loss_train": 0.36844316281770406,
+            "loss_val": 0.3790601435872833,
+            "lr": 0.001,
+            "best_val": 0.3790601435872833
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 30,
+            "loss_train": 0.2607780216555846,
+            "loss_val": 0.26919193127210056,
+            "lr": 0.001,
+            "best_val": 0.26919193127210056
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 40,
+            "loss_train": 0.20508040723047757,
+            "loss_val": 0.21333563693096627,
+            "lr": 0.001,
+            "best_val": 0.21333563693096627
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 50,
+            "loss_train": 0.17063013581853165,
+            "loss_val": 0.17780601620105285,
+            "lr": 0.001,
+            "best_val": 0.17780601620105285
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 60,
+            "loss_train": 0.15510981490737513,
+            "loss_val": 0.16102775641304917,
+            "lr": 0.001,
+            "best_val": 0.15979231876091615
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 70,
+            "loss_train": 0.13856957303850273,
+            "loss_val": 0.14269038787453653,
+            "lr": 0.001,
+            "best_val": 0.14269038787453653
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 80,
+            "loss_train": 0.12382691980976808,
+            "loss_val": 0.1279704319025226,
+            "lr": 0.001,
+            "best_val": 0.1279704319025226
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 90,
+            "loss_train": 0.11061662631599527,
+            "loss_val": 0.11740737045980944,
+            "lr": 0.001,
+            "best_val": 0.11740737045980944
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 100,
+            "loss_train": 0.10225941828991238,
+            "loss_val": 0.10871294345986311,
+            "lr": 0.001,
+            "best_val": 0.10871294345986311
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 110,
+            "loss_train": 0.09287162987809432,
+            "loss_val": 0.1017202000184708,
+            "lr": 0.001,
+            "best_val": 0.09947566304680651
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 120,
+            "loss_train": 0.08716139942407608,
+            "loss_val": 0.09027110861907103,
+            "lr": 0.001,
+            "best_val": 0.09027110861907103
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 130,
+            "loss_train": 0.0809144001258047,
+            "loss_val": 0.08661380266500925,
+            "lr": 0.001,
+            "best_val": 0.08336723323210367
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 140,
+            "loss_train": 0.07328287472850398,
+            "loss_val": 0.09736692834912528,
+            "lr": 0.001,
+            "best_val": 0.07749384061540497
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 150,
+            "loss_train": 0.06822750188018147,
+            "loss_val": 0.07149873893159511,
+            "lr": 0.001,
+            "best_val": 0.07149873893159511
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 160,
+            "loss_train": 0.062195737110941035,
+            "loss_val": 0.06690982875926842,
+            "lr": 0.001,
+            "best_val": 0.06690982875926842
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 170,
+            "loss_train": 0.059513533978085766,
+            "loss_val": 0.06358702693814869,
+            "lr": 0.001,
+            "best_val": 0.0635789682245572
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 180,
+            "loss_train": 0.055258069775606454,
+            "loss_val": 0.05994527485584191,
+            "lr": 0.001,
+            "best_val": 0.058885382237461883
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 190,
+            "loss_train": 0.052517708979154885,
+            "loss_val": 0.05766406208824858,
+            "lr": 0.001,
+            "best_val": 0.05662391651564368
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 200,
+            "loss_train": 0.049549028865600885,
+            "loss_val": 0.05266939794813405,
+            "lr": 0.001,
+            "best_val": 0.05259707709769745
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 210,
+            "loss_train": 0.04642196979961897,
+            "loss_val": 0.04942321408258919,
+            "lr": 0.001,
+            "best_val": 0.04942321408258919
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 220,
+            "loss_train": 0.044447956704779676,
+            "loss_val": 0.04741645939903689,
+            "lr": 0.001,
+            "best_val": 0.04741645939903689
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 230,
+            "loss_train": 0.04095024909628065,
+            "loss_val": 0.04392564788613313,
+            "lr": 0.001,
+            "best_val": 0.04392564788613313
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 240,
+            "loss_train": 0.04004406968229696,
+            "loss_val": 0.043172207277389275,
+            "lr": 0.001,
+            "best_val": 0.04277503517186835
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 250,
+            "loss_train": 0.03811745757335111,
+            "loss_val": 0.04095490501019765,
+            "lr": 0.001,
+            "best_val": 0.04095490501019765
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 260,
+            "loss_train": 0.035889225570779094,
+            "loss_val": 0.03808312214046601,
+            "lr": 0.001,
+            "best_val": 0.03808312214046601
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 270,
+            "loss_train": 0.034512807468050404,
+            "loss_val": 0.03699210946834138,
+            "lr": 0.001,
+            "best_val": 0.03699210946834138
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 280,
+            "loss_train": 0.033055639678710384,
+            "loss_val": 0.03544625501110535,
+            "lr": 0.001,
+            "best_val": 0.03539733156800353
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 290,
+            "loss_train": 0.03118369198943439,
+            "loss_val": 0.03361724472470164,
+            "lr": 0.001,
+            "best_val": 0.03361724472470164
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 300,
+            "loss_train": 0.029693269513939555,
+            "loss_val": 0.0320756241267369,
+            "lr": 0.001,
+            "best_val": 0.03166645306152074
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 310,
+            "loss_train": 0.028817816098269663,
+            "loss_val": 0.03145725848820779,
+            "lr": 0.001,
+            "best_val": 0.031090159785031726
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 320,
+            "loss_train": 0.027625405474712973,
+            "loss_val": 0.030275070925915096,
+            "lr": 0.001,
+            "best_val": 0.02971770445434672
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 330,
+            "loss_train": 0.02598650184901137,
+            "loss_val": 0.027942208066406397,
+            "lr": 0.001,
+            "best_val": 0.027942208066406397
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 340,
+            "loss_train": 0.02497327563009764,
+            "loss_val": 0.02711973819433191,
+            "lr": 0.001,
+            "best_val": 0.026787620828478555
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 350,
+            "loss_train": 0.02420051680191567,
+            "loss_val": 0.02661272597509654,
+            "lr": 0.001,
+            "best_val": 0.026265634895437623
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 360,
+            "loss_train": 0.023425456136465073,
+            "loss_val": 0.02499449215381256,
+            "lr": 0.001,
+            "best_val": 0.0248803970038162
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 370,
+            "loss_train": 0.022234673268700902,
+            "loss_val": 0.024347635797651854,
+            "lr": 0.001,
+            "best_val": 0.024154530624258243
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 380,
+            "loss_train": 0.021758345004759337,
+            "loss_val": 0.022897536724432524,
+            "lr": 0.001,
+            "best_val": 0.022897536724432524
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 390,
+            "loss_train": 0.020695075392723083,
+            "loss_val": 0.023400392900337245,
+            "lr": 0.001,
+            "best_val": 0.022432843206733843
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 400,
+            "loss_train": 0.020111898548508946,
+            "loss_val": 0.021617801482409153,
+            "lr": 0.001,
+            "best_val": 0.021617801482409153
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 410,
+            "loss_train": 0.019634645628301722,
+            "loss_val": 0.02137663022042186,
+            "lr": 0.001,
+            "best_val": 0.02137663022042186
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 420,
+            "loss_train": 0.01878828643576095,
+            "loss_val": 0.02059497742088074,
+            "lr": 0.001,
+            "best_val": 0.02059497742088074
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 430,
+            "loss_train": 0.018468080186530164,
+            "loss_val": 0.02014523707659833,
+            "lr": 0.001,
+            "best_val": 0.02014523707659833
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 440,
+            "loss_train": 0.018689950830058047,
+            "loss_val": 0.019743269107008517,
+            "lr": 0.001,
+            "best_val": 0.019743269107008517
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 450,
+            "loss_train": 0.01772536004060193,
+            "loss_val": 0.01968811831917295,
+            "lr": 0.001,
+            "best_val": 0.019290166268817164
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 460,
+            "loss_train": 0.017067925073206425,
+            "loss_val": 0.018784112843163316,
+            "lr": 0.001,
+            "best_val": 0.01863727512606357
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 470,
+            "loss_train": 0.01687887261964773,
+            "loss_val": 0.018900357949332577,
+            "lr": 0.001,
+            "best_val": 0.01818400929947771
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 480,
+            "loss_train": 0.016851277531761872,
+            "loss_val": 0.0184488592335873,
+            "lr": 0.001,
+            "best_val": 0.017883093521193015
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 490,
+            "loss_train": 0.01599317563599662,
+            "loss_val": 0.01747170107340834,
+            "lr": 0.001,
+            "best_val": 0.01747170107340834
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 500,
+            "loss_train": 0.015850169486121127,
+            "loss_val": 0.017431842738904895,
+            "lr": 0.001,
+            "best_val": 0.017338514575392722
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 510,
+            "loss_train": 0.015202005344786142,
+            "loss_val": 0.016730665980966657,
+            "lr": 0.0005,
+            "best_val": 0.016640170738700964
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 520,
+            "loss_train": 0.015043517672701887,
+            "loss_val": 0.016734769622102647,
+            "lr": 0.0005,
+            "best_val": 0.016438043371060695
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 530,
+            "loss_train": 0.014835794309252187,
+            "loss_val": 0.016432777723775775,
+            "lr": 0.0005,
+            "best_val": 0.01634310591769261
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 540,
+            "loss_train": 0.014720207766482704,
+            "loss_val": 0.016269362943332324,
+            "lr": 0.0005,
+            "best_val": 0.016166978872418462
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 550,
+            "loss_train": 0.014689390302488678,
+            "loss_val": 0.016188363675281772,
+            "lr": 0.0005,
+            "best_val": 0.016105754555193114
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 560,
+            "loss_train": 0.014257924974356828,
+            "loss_val": 0.01586049158603489,
+            "lr": 0.0005,
+            "best_val": 0.01586049158603489
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 570,
+            "loss_train": 0.014338879208815726,
+            "loss_val": 0.01620222353284325,
+            "lr": 0.0005,
+            "best_val": 0.015786630910425824
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 580,
+            "loss_train": 0.014280224905202263,
+            "loss_val": 0.01584176132304553,
+            "lr": 0.0005,
+            "best_val": 0.015534994041784014
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 590,
+            "loss_train": 0.013802817385447653,
+            "loss_val": 0.015696332460814293,
+            "lr": 0.0005,
+            "best_val": 0.015460117536654635
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 600,
+            "loss_train": 0.013925672851895032,
+            "loss_val": 0.015572523988004896,
+            "lr": 0.0005,
+            "best_val": 0.015354579952136696
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 610,
+            "loss_train": 0.013705002830216759,
+            "loss_val": 0.015410894138244289,
+            "lr": 0.0005,
+            "best_val": 0.015067608948329984
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 620,
+            "loss_train": 0.013206362283151401,
+            "loss_val": 0.014921803696232697,
+            "lr": 0.00025,
+            "best_val": 0.014909924171736847
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 630,
+            "loss_train": 0.01312603973048298,
+            "loss_val": 0.01484822965391778,
+            "lr": 0.00025,
+            "best_val": 0.014765620972316418
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 640,
+            "loss_train": 0.012970041140521827,
+            "loss_val": 0.014691354498194586,
+            "lr": 0.000125,
+            "best_val": 0.014683571831984363
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 650,
+            "loss_train": 0.013043852130833426,
+            "loss_val": 0.01490455567251618,
+            "lr": 0.000125,
+            "best_val": 0.014629166164055936
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 660,
+            "loss_train": 0.012964093861611266,
+            "loss_val": 0.014645728133289225,
+            "lr": 0.000125,
+            "best_val": 0.01458290033690533
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 670,
+            "loss_train": 0.01290180112578367,
+            "loss_val": 0.01467583290080816,
+            "lr": 0.000125,
+            "best_val": 0.014509940728247432
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 680,
+            "loss_train": 0.01273739288904165,
+            "loss_val": 0.01449896995460007,
+            "lr": 6.25e-05,
+            "best_val": 0.014477715668739672
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 690,
+            "loss_train": 0.01276512581266855,
+            "loss_val": 0.014446769474467365,
+            "lr": 6.25e-05,
+            "best_val": 0.014446769474467365
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 700,
+            "loss_train": 0.012686713108498799,
+            "loss_val": 0.014477527409922308,
+            "lr": 6.25e-05,
+            "best_val": 0.014442050618989198
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 710,
+            "loss_train": 0.012712409915892701,
+            "loss_val": 0.014454783812329694,
+            "lr": 6.25e-05,
+            "best_val": 0.014416250324232084
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 720,
+            "loss_train": 0.01263554820692853,
+            "loss_val": 0.01442724157419922,
+            "lr": 6.25e-05,
+            "best_val": 0.014391587334790113
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 730,
+            "loss_train": 0.012664123928468479,
+            "loss_val": 0.014399604116552498,
+            "lr": 6.25e-05,
+            "best_val": 0.014355917631667275
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 740,
+            "loss_train": 0.01266266302646775,
+            "loss_val": 0.01437579593365194,
+            "lr": 6.25e-05,
+            "best_val": 0.01432734198674955
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 750,
+            "loss_train": 0.012640644257005892,
+            "loss_val": 0.014375199356501235,
+            "lr": 3.125e-05,
+            "best_val": 0.01432734198674955
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 760,
+            "loss_train": 0.012594404434295077,
+            "loss_val": 0.014333025352068884,
+            "lr": 3.125e-05,
+            "best_val": 0.01430183051513066
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 770,
+            "loss_train": 0.01259903756803588,
+            "loss_val": 0.01432684872224253,
+            "lr": 3.125e-05,
+            "best_val": 0.014285049872578986
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 780,
+            "loss_train": 0.012598999089708454,
+            "loss_val": 0.014296767480455866,
+            "lr": 1.5625e-05,
+            "best_val": 0.014262034505448672
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 790,
+            "loss_train": 0.012527657329644027,
+            "loss_val": 0.014272198066202781,
+            "lr": 1.5625e-05,
+            "best_val": 0.01424360960219783
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 800,
+            "loss_train": 0.012491565589842043,
+            "loss_val": 0.014251754947028182,
+            "lr": 7.8125e-06,
+            "best_val": 0.01424360960219783
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 810,
+            "loss_train": 0.012445594576236448,
+            "loss_val": 0.014249176309897775,
+            "lr": 7.8125e-06,
+            "best_val": 0.014238822591202268
+        },
+        {
+            "stage": "PINN[PRE]",
+            "epoch": 820,
+            "loss_train": 0.012526567976333593,
+            "loss_val": 0.014243389128637261,
+            "lr": 3.90625e-06,
+            "best_val": 0.014238822591202268
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 1,
+            "loss_total": 0.08953858441428135,
+            "loss_data": 0.030081924933351968,
+            "loss_cont": null,
+            "loss_mom": 5945.666015625,
+            "val_score": 1.4248375673074778,
+            "val_data": 0.024293845559235465,
+            "val_cont": 0.0,
+            "lr": 0.001,
+            "best_val": 1.4248375673074778
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 10,
+            "loss_total": 0.048283960866300685,
+            "loss_data": 0.018694115116407995,
+            "loss_cont": null,
+            "loss_mom": 2958.9846319901317,
+            "val_score": 1.1179095094057185,
+            "val_data": 0.020157886739590257,
+            "val_cont": 0.0,
+            "lr": 0.001,
+            "best_val": 1.1179095094057185
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 20,
+            "loss_total": 0.041002515899507624,
+            "loss_data": 0.01889472474393092,
+            "loss_cont": null,
+            "loss_mom": 2210.7792262027137,
+            "val_score": 1.1428745010996275,
+            "val_data": 0.021263251831611162,
+            "val_cont": 0.0,
+            "lr": 0.001,
+            "best_val": 1.1014541722632096
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 30,
+            "loss_total": 0.037742230649057185,
+            "loss_data": 0.01930059541605021,
+            "loss_cont": null,
+            "loss_mom": 1844.1635420949835,
+            "val_score": 1.10683041923331,
+            "val_data": 0.02083170701580098,
+            "val_cont": 0.0,
+            "lr": 0.001,
+            "best_val": 1.0627423294683553
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 40,
+            "loss_total": 0.03466607522415487,
+            "loss_data": 0.018469897834093946,
+            "loss_cont": null,
+            "loss_mom": 1619.6177593030427,
+            "val_score": 1.0680194477502167,
+            "val_data": 0.020261987421607175,
+            "val_cont": 0.0,
+            "lr": 0.001,
+            "best_val": 1.0555635689745881
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 50,
+            "loss_total": 0.033047450412260856,
+            "loss_data": 0.018405845388770103,
+            "loss_cont": null,
+            "loss_mom": 1464.1605288856908,
+            "val_score": 1.0461984981826653,
+            "val_data": 0.019943358993800477,
+            "val_cont": 0.0,
+            "lr": 0.001,
+            "best_val": 1.0262771084412448
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 60,
+            "loss_total": 0.030957740682520364,
+            "loss_data": 0.017524991576608858,
+            "loss_cont": null,
+            "loss_mom": 1343.2749730160363,
+            "val_score": 0.9923773607026964,
+            "val_data": 0.01896119558594314,
+            "val_cont": 0.0,
+            "lr": 0.0005,
+            "best_val": 0.9923773607026964
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 70,
+            "loss_total": 0.03024877137259433,
+            "loss_data": 0.017397866094190823,
+            "loss_cont": null,
+            "loss_mom": 1285.0905568976152,
+            "val_score": 0.9900706751970522,
+            "val_data": 0.018961779293269497,
+            "val_cont": 0.0,
+            "lr": 0.0005,
+            "best_val": 0.9848843263762221
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 80,
+            "loss_total": 0.029564686119556427,
+            "loss_data": 0.017232402914056654,
+            "loss_cont": null,
+            "loss_mom": 1233.2283550061677,
+            "val_score": 0.9793286193143909,
+            "val_data": 0.018794191658840536,
+            "val_cont": 0.0,
+            "lr": 0.0005,
+            "best_val": 0.9793286193143909
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 90,
+            "loss_total": 0.02913802175929672,
+            "loss_data": 0.01726019127588523,
+            "loss_cont": null,
+            "loss_mom": 1187.7830874794408,
+            "val_score": 0.981335190008164,
+            "val_data": 0.018865080340142774,
+            "val_cont": 0.0,
+            "lr": 0.0005,
+            "best_val": 0.9708364853285145
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 100,
+            "loss_total": 0.028259389396560818,
+            "loss_data": 0.01691786400777729,
+            "loss_cont": null,
+            "loss_mom": 1134.1525686163652,
+            "val_score": 0.9664798085140387,
+            "val_data": 0.018600332651715807,
+            "val_cont": 0.0,
+            "lr": 0.0005,
+            "best_val": 0.9595790491923681
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 110,
+            "loss_total": 0.028256955115418685,
+            "loss_data": 0.017216235889415992,
+            "loss_cont": null,
+            "loss_mom": 1104.071947599712,
+            "val_score": 0.9727651032745808,
+            "val_data": 0.01876896052281607,
+            "val_cont": 0.0,
+            "lr": 0.0005,
+            "best_val": 0.953217241360821
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 120,
+            "loss_total": 0.027456056620729596,
+            "loss_data": 0.016835551218766915,
+            "loss_cont": null,
+            "loss_mom": 1062.0505628083881,
+            "val_score": 0.955445759232135,
+            "val_data": 0.018455478566706044,
+            "val_cont": 0.0,
+            "lr": 0.0005,
+            "best_val": 0.9443673408509378
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 130,
+            "loss_total": 0.0270186912660536,
+            "loss_data": 0.016761131682678274,
+            "loss_cont": null,
+            "loss_mom": 1025.7559718081825,
+            "val_score": 0.960550492939424,
+            "val_data": 0.01858903130494004,
+            "val_cont": 0.0,
+            "lr": 0.0005,
+            "best_val": 0.931437257449465
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 140,
+            "loss_total": 0.026511955614152708,
+            "loss_data": 0.016659941769352083,
+            "loss_cont": null,
+            "loss_mom": 985.2014224403783,
+            "val_score": 0.9419681742797038,
+            "val_data": 0.01824403643416996,
+            "val_cont": 0.0,
+            "lr": 0.00025,
+            "best_val": 0.931437257449465
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 150,
+            "loss_total": 0.025818512039749247,
+            "loss_data": 0.01619407024822737,
+            "loss_cont": null,
+            "loss_mom": 962.4441881681744,
+            "val_score": 0.91822595890454,
+            "val_data": 0.01778371517773959,
+            "val_cont": 0.0,
+            "lr": 0.00025,
+            "best_val": 0.9150603038253171
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 160,
+            "loss_total": 0.0254818736330459,
+            "loss_data": 0.016070611039666755,
+            "loss_cont": null,
+            "loss_mom": 941.1262849506579,
+            "val_score": 0.909901816694894,
+            "val_data": 0.017627253471836205,
+            "val_cont": 0.0,
+            "lr": 0.00025,
+            "best_val": 0.9064187956175624
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 170,
+            "loss_total": 0.025447273528889605,
+            "loss_data": 0.016100403411607993,
+            "loss_cont": null,
+            "loss_mom": 934.6870181435033,
+            "val_score": 0.9112307320315454,
+            "val_data": 0.017665684867943954,
+            "val_cont": 0.0,
+            "lr": 0.00025,
+            "best_val": 0.9041070436058305
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 180,
+            "loss_total": 0.02513627168771468,
+            "loss_data": 0.015973629576987343,
+            "loss_cont": null,
+            "loss_mom": 916.2642468904194,
+            "val_score": 0.9010596755187202,
+            "val_data": 0.017480452658405053,
+            "val_cont": 0.0,
+            "lr": 0.00025,
+            "best_val": 0.9000463672411128
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 190,
+            "loss_total": 0.024847072990317094,
+            "loss_data": 0.015866503364553575,
+            "loss_cont": null,
+            "loss_mom": 898.0569490131579,
+            "val_score": 0.8968650616047593,
+            "val_data": 0.017404826994396865,
+            "val_cont": 0.0,
+            "lr": 0.00025,
+            "best_val": 0.8968650616047593
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 200,
+            "loss_total": 0.0246346354680626,
+            "loss_data": 0.01577904629275987,
+            "loss_cont": null,
+            "loss_mom": 885.5589117752878,
+            "val_score": 0.8989587282639079,
+            "val_data": 0.01745508392069695,
+            "val_cont": 0.0,
+            "lr": 0.00025,
+            "best_val": 0.8922445470772201
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 210,
+            "loss_total": 0.024488404001060286,
+            "loss_data": 0.015763921957266957,
+            "loss_cont": null,
+            "loss_mom": 872.4482164884869,
+            "val_score": 0.8889496744429314,
+            "val_data": 0.017267891174090267,
+            "val_cont": 0.0,
+            "lr": 0.00025,
+            "best_val": 0.8884361519316525
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 220,
+            "loss_total": 0.024261858706411562,
+            "loss_data": 0.015680446436530666,
+            "loss_cont": null,
+            "loss_mom": 858.1412482010691,
+            "val_score": 0.89272463538542,
+            "val_data": 0.01735750139641032,
+            "val_cont": 0.0,
+            "lr": 0.00025,
+            "best_val": 0.8841637965135012
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 230,
+            "loss_total": 0.023944065562988583,
+            "loss_data": 0.0155126651454913,
+            "loss_cont": null,
+            "loss_mom": 843.1400756835938,
+            "val_score": 0.8846726221506672,
+            "val_data": 0.017202517501206223,
+            "val_cont": 0.0,
+            "lr": 0.00025,
+            "best_val": 0.8787951979775169
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 240,
+            "loss_total": 0.02396909696491141,
+            "loss_data": 0.0156244434612362,
+            "loss_cont": null,
+            "loss_mom": 834.465377004523,
+            "val_score": 0.8730873658996463,
+            "val_data": 0.016978504417851332,
+            "val_cont": 0.0,
+            "lr": 0.00025,
+            "best_val": 0.8730873658996463
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 250,
+            "loss_total": 0.023638856352159853,
+            "loss_data": 0.015415591187775135,
+            "loss_cont": null,
+            "loss_mom": 822.3265220240543,
+            "val_score": 0.8742027186181132,
+            "val_data": 0.01701547879918644,
+            "val_cont": 0.0,
+            "lr": 0.00025,
+            "best_val": 0.8730873658996463
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 260,
+            "loss_total": 0.023587982219300772,
+            "loss_data": 0.015440987374045347,
+            "loss_cont": null,
+            "loss_mom": 814.6995271381579,
+            "val_score": 0.8691679181073877,
+            "val_data": 0.016921405677977796,
+            "val_cont": 0.0,
+            "lr": 0.00025,
+            "best_val": 0.8688661580542087
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 270,
+            "loss_total": 0.023318569028848095,
+            "loss_data": 0.015331927392827837,
+            "loss_cont": null,
+            "loss_mom": 798.6642070569491,
+            "val_score": 0.8654422743203425,
+            "val_data": 0.016857354674617558,
+            "val_cont": 0.0,
+            "lr": 0.00025,
+            "best_val": 0.8654422743203425
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 280,
+            "loss_total": 0.022939692398435192,
+            "loss_data": 0.015097030389465783,
+            "loss_cont": null,
+            "loss_mom": 784.2662096525494,
+            "val_score": 0.8588377163245549,
+            "val_data": 0.016734417626795894,
+            "val_cont": 0.0,
+            "lr": 0.000125,
+            "best_val": 0.8552269493022147
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 290,
+            "loss_total": 0.022803745869743198,
+            "loss_data": 0.015013323753680053,
+            "loss_cont": null,
+            "loss_mom": 779.0422299033717,
+            "val_score": 0.8547555816059753,
+            "val_data": 0.01665336709869158,
+            "val_cont": 0.0,
+            "lr": 6.25e-05,
+            "best_val": 0.8546809263431159
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 300,
+            "loss_total": 0.02269846691112769,
+            "loss_data": 0.014942895326959459,
+            "loss_cont": null,
+            "loss_mom": 775.5571578176398,
+            "val_score": 0.8545673542164052,
+            "val_data": 0.016653854739524958,
+            "val_cont": 0.0,
+            "lr": 6.25e-05,
+            "best_val": 0.8526050466338045
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 310,
+            "loss_total": 0.02269611693918705,
+            "loss_data": 0.014990968188565029,
+            "loss_cont": null,
+            "loss_mom": 770.5148636667352,
+            "val_score": 0.8526167075829837,
+            "val_data": 0.016616650960079565,
+            "val_cont": 0.0,
+            "lr": 6.25e-05,
+            "best_val": 0.849948251513896
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 320,
+            "loss_total": 0.022625272995547244,
+            "loss_data": 0.014948125193385701,
+            "loss_cont": null,
+            "loss_mom": 767.7148084138569,
+            "val_score": 0.851084038154378,
+            "val_data": 0.0165887080482566,
+            "val_cont": 0.0,
+            "lr": 6.25e-05,
+            "best_val": 0.8496589755997301
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 330,
+            "loss_total": 0.02238077072328643,
+            "loss_data": 0.0147481184746874,
+            "loss_cont": null,
+            "loss_mom": 763.2652330900494,
+            "val_score": 0.8517659041955511,
+            "val_data": 0.016603979846392797,
+            "val_cont": 0.0,
+            "lr": 3.125e-05,
+            "best_val": 0.848565163050939
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 340,
+            "loss_total": 0.022514936367147846,
+            "loss_data": 0.014868038853532389,
+            "loss_cont": null,
+            "loss_mom": 764.6897679379111,
+            "val_score": 0.8477172852863106,
+            "val_data": 0.01652345103706573,
+            "val_cont": 0.0,
+            "lr": 3.125e-05,
+            "best_val": 0.8477172852863106
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 350,
+            "loss_total": 0.02257384957843705,
+            "loss_data": 0.014926687716261336,
+            "loss_cont": null,
+            "loss_mom": 764.7161897358142,
+            "val_score": 0.8473200771700792,
+            "val_data": 0.016517029508751304,
+            "val_cont": 0.0,
+            "lr": 3.125e-05,
+            "best_val": 0.8472146976288322
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 360,
+            "loss_total": 0.022533562034368515,
+            "loss_data": 0.014908095576653355,
+            "loss_cont": null,
+            "loss_mom": 762.5466629831415,
+            "val_score": 0.8507862573514778,
+            "val_data": 0.016587615831212457,
+            "val_cont": 0.0,
+            "lr": 3.125e-05,
+            "best_val": 0.8464508129435484
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 370,
+            "loss_total": 0.022471263416503604,
+            "loss_data": 0.014867564124104223,
+            "loss_cont": null,
+            "loss_mom": 760.369962993421,
+            "val_score": 0.846393226329242,
+            "val_data": 0.016501085325528925,
+            "val_cont": 0.0,
+            "lr": 3.125e-05,
+            "best_val": 0.8462985655703303
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 380,
+            "loss_total": 0.02236495559152804,
+            "loss_data": 0.014815788029840118,
+            "loss_cont": null,
+            "loss_mom": 754.9167801706415,
+            "val_score": 0.8462110073425447,
+            "val_data": 0.016498888501582105,
+            "val_cont": 0.0,
+            "lr": 1.5625e-05,
+            "best_val": 0.8462110073425447
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 390,
+            "loss_total": 0.02244383959393752,
+            "loss_data": 0.014880858067619173,
+            "loss_cont": null,
+            "loss_mom": 756.2981792249178,
+            "val_score": 0.8455797087911456,
+            "val_data": 0.016487021720993648,
+            "val_cont": 0.0,
+            "lr": 1.5625e-05,
+            "best_val": 0.8455150429593059
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 400,
+            "loss_total": 0.022350888797327093,
+            "loss_data": 0.014788740020441381,
+            "loss_cont": null,
+            "loss_mom": 756.214888723273,
+            "val_score": 0.8455226068680595,
+            "val_data": 0.016486020766340106,
+            "val_cont": 0.0,
+            "lr": 1.5625e-05,
+            "best_val": 0.8446637057182225
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 410,
+            "loss_total": 0.022293448448181152,
+            "loss_data": 0.014771339679627042,
+            "loss_cont": null,
+            "loss_mom": 752.2108861019736,
+            "val_score": 0.8445015761761645,
+            "val_data": 0.01646667949315366,
+            "val_cont": 0.0,
+            "lr": 1.5625e-05,
+            "best_val": 0.8443674329139902
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 420,
+            "loss_total": 0.02224206051936275,
+            "loss_data": 0.01474055044941212,
+            "loss_cont": null,
+            "loss_mom": 750.1510395250822,
+            "val_score": 0.844483937798885,
+            "val_data": 0.016466887010229383,
+            "val_cont": 0.0,
+            "lr": 7.8125e-06,
+            "best_val": 0.8443674329139902
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 430,
+            "loss_total": 0.02240784407446259,
+            "loss_data": 0.014862197843429289,
+            "loss_cont": null,
+            "loss_mom": 754.5646490799753,
+            "val_score": 0.844646515349718,
+            "val_data": 0.016470262530988534,
+            "val_cont": 0.0,
+            "lr": 3.90625e-06,
+            "best_val": 0.8440468480275364
+        },
+        {
+            "stage": "PINN[MOMENTUM]",
+            "epoch": 440,
+            "loss_total": 0.022231975962456903,
+            "loss_data": 0.014727493601017877,
+            "loss_cont": null,
+            "loss_mom": 750.4482550370066,
+            "val_score": 0.8442684577541115,
+            "val_data": 0.01646320125822673,
+            "val_cont": 0.0,
+            "lr": 1.953125e-06,
+            "best_val": 0.8440468480275364
+        }
+    ],
+    "config_path": "configs/baseline/pinn_mom_base.yaml",
+    "config_hash": "832a60f5201fc71cb579d1b18768ee1f48555ce4eea20a9c5afa3307b53ef42d",
+    "dataset_path": "data/data_processed/dataset_bfs_2d_kepsilon_Re36000_full.parquet",
+    "dataset_hash": "ce6b9b25461013481af116021cfe6f08f5f0dd85be76589d7a3d46be70ae422b",
+    "split_path": "data/data_processed/splits/dataset_bfs_2d_kepsilon_Re36000_full_spatial_x_quantile_x/b8_v1_seed42.json",
+    "split_hash": "55875800c868ce36e0554e8bf4ff082b53becd7e513e5b3e4b51b093c27aefd6",
+    "split_method": "spatial_x_quantile_x_v1",
+    "split_bins": 8,
+    "split_test_frac": 0.2,
+    "final_metrics": {
+        "best_val": 0.8440468480275364,
+        "model_path": "results/models/pinn/pinn_mom_base_20260825_215647/pinn_mom_base_d4_w64.pt",
+        "evaluation_data": {
+            "metrics": {
+                "mae_uv_coarse_to_fine": 6.016800880432129,
+                "mae_uv_corrected_to_fine": 0.7521554231643677,
+                "mae_uv_deltas_pred_vs_true": 0.7521554231643677,
+                "mae_p_pressure_coarse_to_fine": 285.3958740234375,
+                "mae_p_corrected_to_fine": 20.061763763427734,
+                "mae_p_deltas_pred_vs_true": 20.061763763427734,
+                "rmse_uv_coarse_to_fine": 9.75035572052002,
+                "rmse_uv_corrected_to_fine": 1.3335098028182983,
+                "rmse_p_coarse_to_fine": 347.7868347167969,
+                "rmse_p_corrected_to_fine": 32.41099166870117,
+                "l2_rel_uv_coarse": 0.2169261872768402,
+                "l2_rel_uv_corrected": 0.029667964205145836,
+                "l2_rel_p_coarse": 0.8694500923156738,
+                "l2_rel_p_corrected": 0.08102589845657349,
+                "RER (u,v)": 0.8749908068903516,
+                "RER (p)": 0.92970548774724,
+                "melhora_MAE_pct": 87.49908068903515,
+                "melhora_MAE_pct_pressure": 92.97054877472401,
+                "N": 20118
+            },
+            "metrics_path": "results/metrics/pinn/pinn_mom_base_20260825_215647/pinn_mom_base_d4_w64_seed42.json",
+            "predictions_path": "results/metrics/pinn/pinn_mom_base_20260825_215647/pinn_mom_base_d4_w64_seed42_predictions.parquet",
+            "plots_dir": "results/plots/pinn/pinn_mom_base_d4_w64_seed42_20260825_215647"
+        },
+        "evaluation_physics": {
+            "metrics": {
+                "divergence_source": {
+                    "coarse": "openfoam",
+                    "fine": "openfoam",
+                    "delta": "autograd",
+                    "corrected": "openfoam_coarse_plus_autograd_delta"
+                },
+                "divergence_coarse": {
+                    "mae": 0.15515020901390997,
+                    "rmse": 3.3771785420629157,
+                    "l2": 1071.0981433818506,
+                    "linf": 241.538,
+                    "mean_signed": -0.05707184227719847,
+                    "std": 3.3766962714744255,
+                    "n_valid": 100589,
+                    "valid_fraction": 1.0
+                },
+                "divergence_fine": {
+                    "mae": 0.4239914618908968,
+                    "rmse": 5.366321663790969,
+                    "l2": 1701.9701799257798,
+                    "linf": 864.239,
+                    "mean_signed": -0.03276347774549167,
+                    "std": 5.366221645981304,
+                    "n_valid": 100589,
+                    "valid_fraction": 1.0
+                },
+                "divergence_delta_pred": {
+                    "mae": 98.09999067761858,
+                    "rmse": 310.09889136822386,
+                    "l2": 98350.24789846815,
+                    "linf": 8973.7177734375,
+                    "mean_signed": 18.137093812286505,
+                    "std": 309.5680349387608,
+                    "n_valid": 100589,
+                    "valid_fraction": 1.0
+                },
+                "divergence_corrected": {
+                    "mae": 98.17216206949647,
+                    "rmse": 310.1233559312434,
+                    "l2": 98358.00702274963,
+                    "linf": 8973.7230056275,
+                    "mean_signed": 18.080021970009305,
+                    "std": 309.5958796554319,
+                    "n_valid": 100589,
+                    "valid_fraction": 1.0
+                },
+                "divergence_error_corrected_vs_fine": {
+                    "mae": 98.20589758187128,
+                    "rmse": 310.1756579551013,
+                    "l2": 98374.59501179187,
+                    "linf": 8973.6022216275,
+                    "mean_signed": 18.1127854477548,
+                    "std": 309.64635601150485,
+                    "n_valid": 100589,
+                    "valid_fraction": 1.0
+                },
+                "RER_divergence_rmse_vs_coarse": -90.82912661224232,
+                "RER_divergence_mae_vs_coarse": -631.755590169362,
+                "RER_divergence_rmse_vs_fine": -56.79067587837452,
+                "improvement_divergence_rmse_pct": -9082.912661224233,
+                "improvement_divergence_mae_pct": -63175.5590169362,
+                "improvement_vs_fine_rmse_pct": -5679.067587837452
+            },
+            "metrics_path": "results/metrics/pinn/pinn_mom_base_20260825_215647/pinn_mom_base_d4_w64_seed42_physics.json",
+            "predictions_path": "results/metrics/pinn/pinn_mom_base_20260825_215647/pinn_mom_base_d4_w64_seed42_physics_predictions.parquet",
+            "plots": {
+                "divergence_absolute": "results/plots/pinn/pinn_mom_base_d4_w64_seed42_20260825_215647/pinn_mom_base_divergence_absolute.png",
+                "divergence_signed": "results/plots/pinn/pinn_mom_base_d4_w64_seed42_20260825_215647/pinn_mom_base_divergence_signed.png",
+                "divergence_error_vs_fine": "results/plots/pinn/pinn_mom_base_d4_w64_seed42_20260825_215647/mom_base_divergence_error_vs_fine.png"
+            }
+        }
+    }
+}

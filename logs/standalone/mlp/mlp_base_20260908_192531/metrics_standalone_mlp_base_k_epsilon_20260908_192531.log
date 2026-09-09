@@ -1,0 +1,21 @@
+2026-09-08 19:25:31,945 | INFO | ================================================================================
+2026-09-08 19:25:31,945 | INFO | Iniciando experimento: metrics_standalone_mlp_base
+2026-09-08 19:25:31,945 | INFO | Run ID: metrics_standalone_mlp_base_k_epsilon_20260908_192531
+2026-09-08 19:25:31,945 | INFO | Hardware: {'platform': 'Linux-7.0.0-31-generic-x86_64-with-glibc2.35', 'processor': 'x86_64', 'python_version': '3.11.14', 'cpu_count_logical': 12, 'cpu_count_physical': 6, 'ram_total_gb': 31.23, 'torch_version': '2.9.1+cu128', 'cuda_available': True, 'cuda_version': '12.8', 'gpu_name': 'NVIDIA GeForce RTX 3060', 'gpu_count': 1, 'gpu_memory_gb': 11.63}
+2026-09-08 19:25:31,945 | INFO | Config: {'experiment': {'name': 'base', 'type': 'k_epsilon', 'seed': 42}, 'paths': {'root': '.', 'data_process_dir': 'data/data_processed', 'results_dir': 'results', 'metrics_dir': 'results/metrics', 'plots_dir': 'results/plots', 'logs_dir': 'logs', 'models_dir': 'results/models/mlp/mlp_base_20260908_153000'}, 'dataset': {'parquet': 'dataset_bfs_2d_kepsilon_Re20000_28000_36000_full.parquet'}, 'features': ['x', 'y', 'Ux', 'Uy', 'p', 'Re_norm'], 'targets': ['dUx', 'dUy', 'dp'], 'model': {'type': 'mlp', 'width': 64, 'depth': 4, 'activation': 'tanh'}, 'training': {'batch_size': 4096}}
+2026-09-08 19:25:31,945 | INFO | ================================================================================
+2026-09-08 19:25:31,945 | INFO | Avaliacao independente (fora do pipeline de treino) para mlp_base
+2026-09-08 19:25:31,945 | INFO | Iniciando avaliacao final para base
+2026-09-08 19:25:31,946 | INFO | Modelo: results/models/mlp/mlp_base_20260908_153000/mlp_base_d4_w64.pt
+2026-09-08 19:25:31,946 | INFO | Dataset: data/data_processed/dataset_bfs_2d_kepsilon_Re20000_28000_36000_full.parquet
+2026-09-08 19:26:25,196 | INFO | Avaliacao concluida. Metrics: results/metrics/standalone/mlp/mlp_base_20260908_192531/mlp_base_d4_w64_seed42_eval.json
+2026-09-08 19:26:25,196 | INFO | Predictions: results/metrics/standalone/mlp/mlp_base_20260908_192531/mlp_base_d4_w64_seed42_predictions_eval.parquet
+2026-09-08 19:26:25,196 | INFO | Plots: results/plots/standalone/mlp/mlp_base_20260908_192531/mlp_base_d4_w64_seed42_eval
+2026-09-08 19:26:25,196 | INFO | Iniciando avaliação física no domínio completo.
+2026-09-08 19:26:50,123 | INFO | Avaliação física concluída. Metrics: results/metrics/standalone/mlp/mlp_base_20260908_192531/mlp_base_d4_w64_seed42_physics.json
+2026-09-08 19:26:50,123 | INFO | ================================================================================
+2026-09-08 19:26:50,123 | INFO | Experimento finalizado
+2026-09-08 19:26:50,123 | INFO | Wall time: 78.18 s
+2026-09-08 19:26:50,123 | INFO | CPU time: 78.28 s
+2026-09-08 19:26:50,123 | INFO | Metadados salvos em: logs/standalone/mlp/mlp_base_20260908_192531/metrics_standalone_mlp_base_k_epsilon_20260908_192531.json
+2026-09-08 19:26:50,123 | INFO | ================================================================================
