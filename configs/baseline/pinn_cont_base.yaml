@@ -23,7 +23,10 @@ features:
   - Ux
   - Uy
   - p
-  - Re_norm
+  - du_dx_log
+  - du_dy_log
+  - dv_dx_log
+  - dv_dy_log
 
 targets:
   - dUx

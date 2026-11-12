@@ -25,6 +25,10 @@ features:
   - p
   - Re
   - nut_log
+  - du_dx_log
+  - du_dy_log
+  - dv_dx_log
+  - dv_dy_log
 
 targets:
   - dUx
@@ -64,5 +68,5 @@ pinn:
   epochs_pre: 2000
   epochs_phys: 2000
   w_data: 1.0
-  w_cont: 7.5e-5
-  w_mom: 1e-6
+  w_cont: 1e-2
+  w_mom: 1e-3
