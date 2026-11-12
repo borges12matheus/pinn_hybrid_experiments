@@ -733,6 +733,12 @@ out = df[[
     "nut_log",
 
     "div_u",
+    
+    # Gradientes
+    "du_dx_log",
+    "du_dy_log",
+    "dv_dx_log",
+    "dv_dy_log",
 
     "wz_log",
     "sxy_log",

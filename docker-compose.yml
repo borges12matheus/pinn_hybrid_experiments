@@ -36,7 +36,12 @@ services:
 
   train_pinn:
     <<: *common
-    container_name: bfs_2d_pinn_train
+    container_name: bfs_2d_ercoftac_pinn_train
+    command: python src/train_pinn.py --config configs/baseline/pinn_cont_base.yaml
+
+  train_pinn2:
+    <<: *common
+    container_name: bfs_2d_ercoftac_pinn_train2
     command: python src/train_pinn.py --config configs/baseline/pinn_cont_mom_base.yaml
 
   run_train_pipeline:
